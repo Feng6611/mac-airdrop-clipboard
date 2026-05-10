@@ -1,92 +1,93 @@
+<p align="center">
+  <img src="IconDesigns/app-icon-256.png" width="128" height="128" alt="Clipboard Drop icon">
+</p>
+
 <h1 align="center">Clipboard Drop</h1>
 
 <p align="center">
-  <strong>Send copied text via AirDrop.</strong>
+  <strong>Copy. Send. Done.</strong><br>
+  Turn clipboard text into an AirDrop file — no receiver app, no cloud sync, no same Apple ID required.
 </p>
 
 <p align="center">
-  Different Apple ID? Send copied text with AirDrop. Clipboard Drop turns clipboard text into a simple <code>.txt</code>, <code>.md</code>, or URL item you can send to nearby Apple devices.
+  <a href="#install">Install</a> · <a href="#how-it-works">How It Works</a> · <a href="#faq">FAQ</a> · <a href="PRIVACY.md">Privacy</a>
 </p>
 
 <p align="center">
-  <sub>No receiver app · No cloud sync · No saved clipboard history</sub>
+  <img src="IconDesigns/screenshot-hero.png" width="720" alt="Clipboard Drop — copy text, drop it nearby via AirDrop">
 </p>
 
 ## Features
 
-- **Send copied text with AirDrop** to nearby Apple devices.
-- **No receiver setup** — the other device only needs to be able to receive AirDrop.
-- **Simple file formats** for quick handoff: `.txt`, `.md`, and URL files for copied links.
-- **Menu bar first** — copy text, open Clipboard Drop, and send.
-- **Private by default** — clipboard text stays local and is not uploaded or synced.
-- **Open source** and easy to audit.
+- **Menu bar app** — copy text, click send, pick a device
+- **No setup on the receiver** — any device that accepts AirDrop can receive
+- **Text & links** — sends as `.txt`, `.md`, or URL file, configurable in settings
+- **Private** — clipboard stays local, history is in-memory only, cleared on quit
+- **Open source** — MIT licensed, easy to audit
 
-## Supported Content
+## Install
 
-- Plain text
-- URLs
+> Requires macOS 14 Sonoma or later.
 
-Use it for links, codes, commands, addresses, notes, snippets, and quick text handoff.
+**Download** the latest release from [Releases](https://github.com/Feng6611/mac_airdrop_clipboard/releases), unzip, and drag to `/Applications`.
 
-## Send Formats
-
-| Content | Formats |
-|---|---|
-| Text | `.txt`, `.md` |
-| URLs | URL file, `.txt` |
-
-## Icon Assets
-
-The current Icon Composer source is kept at [`ClipDrop.icon`](ClipDrop.icon), with a 1024px PNG export backed up at [`IconDesigns/ClipDrop-iOS-Default-1024x1024@1x.png`](IconDesigns/ClipDrop-iOS-Default-1024x1024@1x.png).
-
-## How It Works
-
-Clipboard Drop reads the current text clipboard with `NSPasteboard`, writes a temporary UTF-8 file, and asks the system AirDrop sharing service to send it. The receiver does not need Clipboard Drop installed, paired, or signed in with the same Apple ID.
-
-The app uses a menu bar popover hosted through `KikiMenuBar`, shared settings UI from `KikiSettings`, and local macOS services inside the app target.
-
-## FAQ
-
-**Does the receiver need to install anything?**
-
-No. If their device can receive AirDrop, it can receive your text file or URL item.
-
-**Does Clipboard Drop sync clipboard content?**
-
-No. Clipboard Drop does not use cloud sync, accounts, servers, or a receiving service.
-
-**Does Clipboard Drop store clipboard history?**
-
-No saved history is written to disk. Recent clipboard text is only kept in memory while the app is running and is cleared when the app quits.
-
-**Why use AirDrop instead of Universal Clipboard?**
-
-Universal Clipboard is great when both devices are signed into the same Apple ID and handoff is working. Clipboard Drop is for quick text handoff when the receiving device is nearby but not part of that setup.
-
-## Build
+Or build from source:
 
 ```sh
 ./script/build_and_run.sh
-./script/build_and_run.sh --verify
 ```
 
-## Test
+## How It Works
+
+1. Copy any text or URL
+2. Click the Clipboard Drop icon in the menu bar
+3. Hit **Send** — the app writes a temporary file and hands it to AirDrop
+4. Pick a nearby device in the AirDrop picker
+
+The receiver does not need Clipboard Drop installed.
+
+| Content | Available formats |
+|---|---|
+| Text | `.txt` · `.md` |
+| URL | `.txt` · `.url` |
+
+## FAQ
+
+<details>
+<summary><strong>Does the receiver need to install anything?</strong></summary>
+No. Any device that can receive AirDrop can open the text file or URL.
+</details>
+
+<details>
+<summary><strong>Does it sync clipboard content?</strong></summary>
+No. No cloud sync, no accounts, no servers.
+</details>
+
+<details>
+<summary><strong>Does it store clipboard history?</strong></summary>
+Recent items are kept in memory while the app runs. Nothing is written to disk. Quitting the app clears everything.
+</details>
+
+<details>
+<summary><strong>Why not just use Universal Clipboard?</strong></summary>
+Universal Clipboard needs the same Apple ID and Handoff enabled on both devices. Clipboard Drop works with any nearby AirDrop-capable device regardless of account.
+</details>
+
+## Development
 
 ```sh
-xcodebuild test -project ClipDrop.xcodeproj -scheme ClipDrop -destination 'platform=macOS,arch=arm64'
+# Build & run
+./script/build_and_run.sh
+
+# Verify build
+./script/build_and_run.sh --verify
+
+# Run tests
+xcodebuild test -project ClipDrop.xcodeproj -scheme ClipDrop \
+  -destination 'platform=macOS,arch=arm64'
 ```
 
-## Architecture
-
-Clipboard Drop follows a small macOS app structure:
-
-- `App/`: app lifecycle, Kiki wiring, and controller state.
-- `Features/`: menu bar popover and settings scene.
-- `Platform/`: pasteboard monitoring, formatted text extraction, and AirDrop file sharing.
-- `Shared/`: app config, send preferences, links, and app-specific design tokens.
-- `IconDesigns/`: icon source files and exported icon backups.
-
-See [Docs/Architecture.md](Docs/Architecture.md) for the folder boundaries.
+See [Docs/Architecture.md](Docs/Architecture.md) for the codebase structure.
 
 ## Privacy
 

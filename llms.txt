@@ -1,0 +1,35 @@
+# Clipboard Drop
+
+> Send copied text via AirDrop from the macOS menu bar.
+
+Clipboard Drop is a lightweight macOS menu bar app that reads clipboard text, writes it to a temporary file (.txt, .md, or .url), and hands it to AirDrop for quick transfer to nearby Apple devices.
+
+## Use case
+
+Universal Clipboard requires the same Apple ID and Handoff enabled on both devices. Clipboard Drop works with any nearby AirDrop-capable device regardless of account — useful for sending links, commands, code snippets, or notes across different Apple IDs.
+
+## Key facts
+
+- macOS 14 Sonoma or later
+- Menu bar app (no Dock icon)
+- Sends text and HTTP/HTTPS URLs
+- Output formats: .txt, .md, .url (configurable)
+- Receiver needs no app installed — only AirDrop
+- Clipboard history is in-memory only, cleared on quit
+- No cloud sync, no accounts, no servers, no data collection
+- Open source, MIT licensed
+- Built with Swift, SwiftUI, AppKit
+
+## Architecture
+
+- App/: SwiftUI app entry, NSApplicationDelegate, controller
+- Features/: menu bar popover UI, settings UI
+- Platform/: NSPasteboard monitoring, NSSharingService AirDrop bridge
+- Shared/: app config, design tokens, send preferences
+
+## Links
+
+- Repository: https://github.com/Feng6611/mac_airdrop_clipboard
+- Issues: https://github.com/Feng6611/mac_airdrop_clipboard/issues
+- Privacy policy: https://github.com/Feng6611/mac_airdrop_clipboard/blob/main/PRIVACY.md
+- License: MIT
