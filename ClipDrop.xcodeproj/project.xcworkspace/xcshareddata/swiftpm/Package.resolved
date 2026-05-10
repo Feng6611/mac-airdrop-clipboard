@@ -1,0 +1,15 @@
+{
+  "originHash" : "6a403dc385bfd7882a257d7841395832e67a71e50c84cf0cf00e5d677f417c3a",
+  "pins" : [
+    {
+      "identity" : "kiki_mackit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Feng6611/Kiki_mackit.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "c46c2f3dfd0ac341145dbe80301d10e6d63da3d8"
+      }
+    }
+  ],
+  "version" : 3
+}

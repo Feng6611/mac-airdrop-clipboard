@@ -1,0 +1,71 @@
+<svg width="2400" height="1600" viewBox="0 0 2400 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f7fbff"/>
+      <stop offset="1" stop-color="#eef4f8"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fdff"/>
+      <stop offset="0.48" stop-color="#d7edf8"/>
+      <stop offset="1" stop-color="#a5cadc"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-15%" width="140%" height="145%">
+      <feDropShadow dx="0" dy="30" stdDeviation="28" flood-color="#23506b" flood-opacity="0.22"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#ffffff" flood-opacity="0.7"/>
+    </filter>
+    <style>
+      .label { font: 500 38px -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; fill: #45545d; }
+      .symbol { stroke: #1d2930; stroke-width: 48; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .fill-symbol { fill: #1d2930; }
+      .line { stroke: #1d2930; stroke-width: 34; stroke-linecap: round; }
+      .accent { stroke: #20a7be; stroke-width: 44; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .coral { stroke: #f47e65; stroke-width: 44; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+    </style>
+  </defs>
+
+  <rect width="2400" height="1600" fill="url(#bg)"/>
+
+  <g transform="translate(260 180)">
+    <rect width="760" height="560" rx="118" fill="url(#tile)" filter="url(#softShadow)"/>
+    <g transform="translate(118 50) scale(.52)">
+      <rect x="304" y="234" width="416" height="500" rx="76" class="symbol"/>
+      <path d="M412 230c0-60 44-100 100-100s100 40 100 100" class="symbol"/>
+      <path d="M404 398h216M404 510h216M404 622h148" class="line"/>
+      <path d="M760 352c74 74 74 194 0 268M820 292c108 108 108 280 0 388" class="accent"/>
+    </g>
+    <text x="380" y="650" text-anchor="middle" class="label">A · Clipboard + AirDrop</text>
+  </g>
+
+  <g transform="translate(1380 180)">
+    <rect width="760" height="560" rx="118" fill="url(#tile)" filter="url(#softShadow)"/>
+    <g transform="translate(102 35) scale(.56)">
+      <path d="M258 704 790 258 646 774 514 604 258 704Z" class="symbol"/>
+      <path d="M514 604 650 472" class="line"/>
+      <path d="M250 354c-58 58-58 152 0 210M178 282c-98 98-98 258 0 356" class="accent"/>
+    </g>
+    <text x="380" y="650" text-anchor="middle" class="label">B · Send Plane</text>
+  </g>
+
+  <g transform="translate(260 900)">
+    <rect width="760" height="560" rx="118" fill="url(#tile)" filter="url(#softShadow)"/>
+    <g transform="translate(102 44) scale(.55)">
+      <path d="M348 314h276c64 0 116 52 116 116v252c0 64-52 116-116 116H348c-64 0-116-52-116-116V430c0-64 52-116 116-116Z" class="symbol"/>
+      <path d="M386 314v-38c0-70 56-126 126-126s126 56 126 126v38" class="symbol"/>
+      <path d="M384 500h256M384 610h188" class="line"/>
+      <path d="M770 448l96 96-96 96M636 544h216" class="coral"/>
+    </g>
+    <text x="380" y="650" text-anchor="middle" class="label">C · Clip + Arrow</text>
+  </g>
+
+  <g transform="translate(1380 900)">
+    <rect width="760" height="560" rx="118" fill="url(#tile)" filter="url(#softShadow)"/>
+    <g transform="translate(94 40) scale(.56)">
+      <rect x="260" y="284" width="448" height="384" rx="72" class="symbol"/>
+      <path d="M352 416h264M352 520h196" class="line"/>
+      <path d="M738 392c52 52 52 136 0 188M798 332c86 86 86 222 0 308" class="accent"/>
+      <circle cx="484" cy="756" r="36" class="fill-symbol"/>
+      <path d="M386 756h196" class="line"/>
+    </g>
+    <text x="380" y="650" text-anchor="middle" class="label">D · Text Card + Signal</text>
+  </g>
+</svg>
