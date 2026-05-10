@@ -3,22 +3,20 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5643BFA92FB0D55B001DFA7C /* ClipDrop.icon in Resources */ = {isa = PBXBuildFile; fileRef = 5643BFA82FB0D55B001DFA7C /* ClipDrop.icon */; };
+		5643BFAA2FB0D55B001DFA7C /* ClipDrop.icon in Resources */ = {isa = PBXBuildFile; fileRef = 5643BFA82FB0D55B001DFA7C /* ClipDrop.icon */; };
 		A00100000000000000000001 /* App/ClipDropApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000001 /* App/ClipDropApp.swift */; };
 		A00100000000000000000002 /* Shared/ClipDropAppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000002 /* Shared/ClipDropAppConfig.swift */; };
-		A00100000000000000000003 /* App/State/ClipDropAccessStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000003 /* App/State/ClipDropAccessStore.swift */; };
 		A00100000000000000000005 /* Features/Settings/ClipDropSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000005 /* Features/Settings/ClipDropSettingsView.swift */; };
-		A00100000000000000000006 /* Features/Access/ClipDropAccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000006 /* Features/Access/ClipDropAccessView.swift */; };
 		A00100000000000000000007 /* ClipDropTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000007 /* ClipDropTests.swift */; };
 		A00100000000000000000008 /* KikiSettings in Frameworks */ = {isa = PBXBuildFile; productRef = A00B00000000000000000001 /* KikiSettings */; };
 		A00100000000000000000009 /* KikiMenuBar in Frameworks */ = {isa = PBXBuildFile; productRef = A00B00000000000000000002 /* KikiMenuBar */; };
-		A0010000000000000000000A /* KikiPaywall in Frameworks */ = {isa = PBXBuildFile; productRef = A00B00000000000000000003 /* KikiPaywall */; };
 		A0010000000000000000000B /* KikiSettings in Frameworks */ = {isa = PBXBuildFile; productRef = A00B00000000000000000001 /* KikiSettings */; };
 		A0010000000000000000000C /* KikiMenuBar in Frameworks */ = {isa = PBXBuildFile; productRef = A00B00000000000000000002 /* KikiMenuBar */; };
-		A0010000000000000000000D /* KikiPaywall in Frameworks */ = {isa = PBXBuildFile; productRef = A00B00000000000000000003 /* KikiPaywall */; };
 		A0010000000000000000000E /* Platform/Clipboard/ClipboardHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0020000000000000000000B /* Platform/Clipboard/ClipboardHistoryStore.swift */; };
 		A0010000000000000000000F /* Platform/Sharing/ClipboardSenderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0020000000000000000000C /* Platform/Sharing/ClipboardSenderService.swift */; };
 		A00100000000000000000010 /* App/ClipDropController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0020000000000000000000D /* App/ClipDropController.swift */; };
@@ -27,7 +25,6 @@
 		A00100000000000000000014 /* KikiWindow in Frameworks */ = {isa = PBXBuildFile; productRef = A00B00000000000000000005 /* KikiWindow */; };
 		A00100000000000000000015 /* KikiDesign in Frameworks */ = {isa = PBXBuildFile; productRef = A00B00000000000000000004 /* KikiDesign */; };
 		A00100000000000000000016 /* KikiWindow in Frameworks */ = {isa = PBXBuildFile; productRef = A00B00000000000000000005 /* KikiWindow */; };
-		A00100000000000000000017 /* Features/Access/ClipDropAccessModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000010 /* Features/Access/ClipDropAccessModels.swift */; };
 		A00100000000000000000018 /* Features/Settings/ClipDropSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000011 /* Features/Settings/ClipDropSettingsTab.swift */; };
 		A00100000000000000000019 /* Platform/Clipboard/ClipboardHistoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000012 /* Platform/Clipboard/ClipboardHistoryItem.swift */; };
 		A0010000000000000000001A /* Shared/ClipDropSendPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000013 /* Shared/ClipDropSendPreferences.swift */; };
@@ -49,11 +46,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5643BFA82FB0D55B001DFA7C /* ClipDrop.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = ClipDrop.icon; sourceTree = "<group>"; };
+		56A000000000000000000001 /* ClipDrop.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ClipDrop.entitlements; sourceTree = "<group>"; };
 		A00200000000000000000001 /* App/ClipDropApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/ClipDropApp.swift; sourceTree = "<group>"; };
 		A00200000000000000000002 /* Shared/ClipDropAppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared/ClipDropAppConfig.swift; sourceTree = "<group>"; };
-		A00200000000000000000003 /* App/State/ClipDropAccessStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/State/ClipDropAccessStore.swift; sourceTree = "<group>"; };
 		A00200000000000000000005 /* Features/Settings/ClipDropSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Settings/ClipDropSettingsView.swift; sourceTree = "<group>"; };
-		A00200000000000000000006 /* Features/Access/ClipDropAccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Access/ClipDropAccessView.swift; sourceTree = "<group>"; };
 		A00200000000000000000007 /* ClipDropTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipDropTests.swift; sourceTree = "<group>"; };
 		A00200000000000000000008 /* ClipDrop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClipDrop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00200000000000000000009 /* ClipDropTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClipDropTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -62,7 +59,6 @@
 		A0020000000000000000000C /* Platform/Sharing/ClipboardSenderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform/Sharing/ClipboardSenderService.swift; sourceTree = "<group>"; };
 		A0020000000000000000000D /* App/ClipDropController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/ClipDropController.swift; sourceTree = "<group>"; };
 		A0020000000000000000000F /* Features/MenuBar/ClipDropMenuPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/MenuBar/ClipDropMenuPopoverView.swift; sourceTree = "<group>"; };
-		A00200000000000000000010 /* Features/Access/ClipDropAccessModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Access/ClipDropAccessModels.swift; sourceTree = "<group>"; };
 		A00200000000000000000011 /* Features/Settings/ClipDropSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Settings/ClipDropSettingsTab.swift; sourceTree = "<group>"; };
 		A00200000000000000000012 /* Platform/Clipboard/ClipboardHistoryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform/Clipboard/ClipboardHistoryItem.swift; sourceTree = "<group>"; };
 		A00200000000000000000013 /* Shared/ClipDropSendPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared/ClipDropSendPreferences.swift; sourceTree = "<group>"; };
@@ -81,7 +77,6 @@
 			files = (
 				A00100000000000000000008 /* KikiSettings in Frameworks */,
 				A00100000000000000000009 /* KikiMenuBar in Frameworks */,
-				A0010000000000000000000A /* KikiPaywall in Frameworks */,
 				A00100000000000000000013 /* KikiDesign in Frameworks */,
 				A00100000000000000000014 /* KikiWindow in Frameworks */,
 			);
@@ -93,7 +88,6 @@
 			files = (
 				A0010000000000000000000B /* KikiSettings in Frameworks */,
 				A0010000000000000000000C /* KikiMenuBar in Frameworks */,
-				A0010000000000000000000D /* KikiPaywall in Frameworks */,
 				A00100000000000000000015 /* KikiDesign in Frameworks */,
 				A00100000000000000000016 /* KikiWindow in Frameworks */,
 			);
@@ -110,6 +104,7 @@
 				A00700000000000000000002 /* ClipDrop */,
 				A00700000000000000000003 /* ClipDropTests */,
 				A00700000000000000000004 /* Products */,
+				5643BFA82FB0D55B001DFA7C /* ClipDrop.icon */,
 			);
 			sourceTree = "<group>";
 		};
@@ -119,6 +114,7 @@
 				A00700000000000000000005 /* App */,
 				A00700000000000000000007 /* Features */,
 				A0070000000000000000000B /* Platform */,
+				56A000000000000000000001 /* ClipDrop.entitlements */,
 				A0070000000000000000000E /* Shared */,
 			);
 			path = ClipDrop;
@@ -146,17 +142,8 @@
 			children = (
 				A00200000000000000000001 /* App/ClipDropApp.swift */,
 				A0020000000000000000000D /* App/ClipDropController.swift */,
-				A00700000000000000000006 /* State */,
 			);
 			name = App;
-			sourceTree = "<group>";
-		};
-		A00700000000000000000006 /* State */ = {
-			isa = PBXGroup;
-			children = (
-				A00200000000000000000003 /* App/State/ClipDropAccessStore.swift */,
-			);
-			name = State;
 			sourceTree = "<group>";
 		};
 		A00700000000000000000007 /* Features */ = {
@@ -164,7 +151,6 @@
 			children = (
 				A00700000000000000000008 /* MenuBar */,
 				A00700000000000000000009 /* Settings */,
-				A0070000000000000000000A /* Access */,
 			);
 			name = Features;
 			sourceTree = "<group>";
@@ -188,15 +174,6 @@
 				A00200000000000000000011 /* Features/Settings/ClipDropSettingsTab.swift */,
 			);
 			name = Settings;
-			sourceTree = "<group>";
-		};
-		A0070000000000000000000A /* Access */ = {
-			isa = PBXGroup;
-			children = (
-				A00200000000000000000006 /* Features/Access/ClipDropAccessView.swift */,
-				A00200000000000000000010 /* Features/Access/ClipDropAccessModels.swift */,
-			);
-			name = Access;
 			sourceTree = "<group>";
 		};
 		A0070000000000000000000B /* Platform */ = {
@@ -262,7 +239,6 @@
 			packageProductDependencies = (
 				A00B00000000000000000001 /* KikiSettings */,
 				A00B00000000000000000002 /* KikiMenuBar */,
-				A00B00000000000000000003 /* KikiPaywall */,
 				A00B00000000000000000004 /* KikiDesign */,
 				A00B00000000000000000005 /* KikiWindow */,
 			);
@@ -287,7 +263,6 @@
 			packageProductDependencies = (
 				A00B00000000000000000001 /* KikiSettings */,
 				A00B00000000000000000002 /* KikiMenuBar */,
-				A00B00000000000000000003 /* KikiPaywall */,
 				A00B00000000000000000004 /* KikiDesign */,
 				A00B00000000000000000005 /* KikiWindow */,
 			);
@@ -341,6 +316,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5643BFAA2FB0D55B001DFA7C /* ClipDrop.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -348,6 +324,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5643BFA92FB0D55B001DFA7C /* ClipDrop.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -360,14 +337,11 @@
 			files = (
 				A00100000000000000000001 /* App/ClipDropApp.swift in Sources */,
 				A00100000000000000000002 /* Shared/ClipDropAppConfig.swift in Sources */,
-				A00100000000000000000003 /* App/State/ClipDropAccessStore.swift in Sources */,
 				A00100000000000000000005 /* Features/Settings/ClipDropSettingsView.swift in Sources */,
-				A00100000000000000000006 /* Features/Access/ClipDropAccessView.swift in Sources */,
 				A0010000000000000000000E /* Platform/Clipboard/ClipboardHistoryStore.swift in Sources */,
 				A0010000000000000000000F /* Platform/Sharing/ClipboardSenderService.swift in Sources */,
 				A00100000000000000000010 /* App/ClipDropController.swift in Sources */,
 				A00100000000000000000012 /* Features/MenuBar/ClipDropMenuPopoverView.swift in Sources */,
-				A00100000000000000000017 /* Features/Access/ClipDropAccessModels.swift in Sources */,
 				A00100000000000000000018 /* Features/Settings/ClipDropSettingsTab.swift in Sources */,
 				A00100000000000000000019 /* Platform/Clipboard/ClipboardHistoryItem.swift in Sources */,
 				A0010000000000000000001A /* Shared/ClipDropSendPreferences.swift in Sources */,
@@ -516,7 +490,9 @@
 		A00E00000000000000000003 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = ClipDrop;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_ENTITLEMENTS = ClipDrop/ClipDrop.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -540,7 +516,9 @@
 		A00E00000000000000000004 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = ClipDrop;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_ENTITLEMENTS = ClipDrop/ClipDrop.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -644,11 +622,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A00D00000000000000000001 /* XCRemoteSwiftPackageReference "Kiki_mackit" */;
 			productName = KikiMenuBar;
-		};
-		A00B00000000000000000003 /* KikiPaywall */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A00D00000000000000000001 /* XCRemoteSwiftPackageReference "Kiki_mackit" */;
-			productName = KikiPaywall;
 		};
 		A00B00000000000000000004 /* KikiDesign */ = {
 			isa = XCSwiftPackageProductDependency;

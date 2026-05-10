@@ -15,10 +15,9 @@ Command Reopen-style app-target layout:
 Keep V1 narrow:
 
 - Send text clipboard content as one AirDrop-able UTF-8 `.txt` file.
-- Keep recent clipboard items in memory only, capped at 5.
+- Keep recent clipboard items in memory only, capped at the app config limit.
 - Do not add persisted clipboard history, cloud sync, receive-side automation, or Nearby Direct in V1.
 - Keep AirDrop and pasteboard business logic in the app target, not in `Kiki_mackit`.
-- Keep commercial access behind `ClipDropAccessProviding`; V1 must not block sending.
 - Keep SwiftUI/Kiki UI out of `Platform/`, and keep AppKit service code out of
   feature views.
 

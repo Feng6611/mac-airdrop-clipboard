@@ -203,12 +203,25 @@ final class ClipDropTests: XCTestCase {
         XCTAssertEqual(try String(contentsOf: result.fileURL, encoding: .utf8), "ftp://example.com/file")
     }
 
+    func testSenderRemovesPreviousTemporaryFilesOnStartup() throws {
+        let temporaryDirectory = FileManager.default.temporaryDirectory.appendingPathComponent(
+            "ClipboardDrop",
+            isDirectory: true
+        )
+        try FileManager.default.createDirectory(at: temporaryDirectory, withIntermediateDirectories: true)
+        let staleFileURL = temporaryDirectory.appendingPathComponent("stale.txt")
+        try "old clipboard".write(to: staleFileURL, atomically: true, encoding: .utf8)
+
+        _ = ClipboardSenderService(sharingProvider: FakeClipboardSharingProvider())
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: staleFileURL.path))
+    }
+
     func testControllerKeepsHistoryItemTypeAfterCopy() {
         let controller = ClipDropController(
             sender: ClipboardSenderService(sharingProvider: FakeClipboardSharingProvider()),
             historyStore: ClipboardHistoryStore(pasteboard: NSPasteboard(name: NSPasteboard.Name(UUID().uuidString)))
         )
-        controller.clearRecentItems()
         let item = ClipboardHistoryItem(id: UUID(), text: "hello", contentType: .link, createdAt: Date())
         controller.copyHistoryItem(item)
 
@@ -217,11 +230,19 @@ final class ClipDropTests: XCTestCase {
         XCTAssertEqual(controller.historyItems.map(\.contentType), [.link])
     }
 
-    func testAccessStoreDefaultsToUnrestrictedStub() {
-        let store = ClipDropAccessStore()
+    func testDefaultHistoryLimitMatchesAppConfig() {
+        XCTAssertEqual(ClipDropAppConfig.default.maxRecentItems, 10)
 
-        XCTAssertTrue(store.isSendingAllowed)
-        XCTAssertEqual(store.snapshot.accountStatus, "Unrestricted")
+        let store = ClipboardHistoryStore(
+            pasteboard: NSPasteboard(name: NSPasteboard.Name(UUID().uuidString))
+        )
+        for index in 0..<12 {
+            store.record("item \(index)")
+        }
+
+        XCTAssertEqual(store.items.count, 10)
+        XCTAssertEqual(store.items.first?.text, "item 11")
+        XCTAssertEqual(store.items.last?.text, "item 2")
     }
 
     func testVersionSummaryUsesStableFormat() {

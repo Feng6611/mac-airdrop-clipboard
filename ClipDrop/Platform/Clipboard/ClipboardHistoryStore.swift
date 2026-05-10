@@ -20,16 +20,12 @@ final class ClipboardHistoryStore: ObservableObject {
     private let maxItemCount: Int
     private var lastChangeCount: Int
     private var suppressedChangeCount: Int?
-    private var timer: Timer?
+    private var timer: DispatchSourceTimer?
 
-    init(pasteboard: NSPasteboard = .general, maxItemCount: Int = 5) {
+    init(pasteboard: NSPasteboard = .general, maxItemCount: Int = ClipDropAppConfig.default.maxRecentItems) {
         self.pasteboard = pasteboard
         self.maxItemCount = maxItemCount
         self.lastChangeCount = pasteboard.changeCount
-    }
-
-    deinit {
-        timer?.invalidate()
     }
 
     func startMonitoring() {
@@ -38,11 +34,20 @@ final class ClipboardHistoryStore: ObservableObject {
         }
 
         syncCurrentClipboard()
-        timer = Timer.scheduledTimer(withTimeInterval: 0.75, repeats: true) { [weak self] _ in
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now() + 0.75, repeating: 0.75)
+        timer.setEventHandler { [weak self] in
             Task { @MainActor in
                 self?.captureCurrentClipboardIfNeeded()
             }
         }
+        self.timer = timer
+        timer.resume()
+    }
+
+    func stopMonitoring() {
+        timer?.cancel()
+        timer = nil
     }
 
     func syncCurrentClipboard() {

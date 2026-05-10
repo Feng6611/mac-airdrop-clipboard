@@ -3,8 +3,6 @@ import SwiftUI
 
 struct ClipDropSettingsView: View {
     let config: ClipDropAppConfig
-    @ObservedObject var controller: ClipDropController
-    @ObservedObject var accessStore: ClipDropAccessStore
     @StateObject private var navigation = KikiSettingsNavigationModel<ClipDropSettingsTab>(selectedTab: .general)
     @AppStorage(ClipDropPreferenceKeys.textFileFormat) private var textFileFormat = ClipDropSendPreferences.defaultTextFileFormat.rawValue
     @AppStorage(ClipDropPreferenceKeys.urlSendFormat) private var urlSendFormat = ClipDropSendPreferences.defaultURLSendFormat.rawValue
@@ -44,19 +42,6 @@ struct ClipDropSettingsView: View {
                 }
                 .pickerStyle(.segmented)
             }
-
-            Section("Status") {
-                KikiSettingsStatusRow(
-                    title: "Summary",
-                    value: controller.statusSummary,
-                    systemImage: "waveform.path.ecg"
-                )
-                KikiSettingsHelperText(controller.detailSummary)
-            }
-
-            Section("Privacy") {
-                KikiSettingsHelperText("Recent clipboard text is kept in memory only, capped at \(config.maxRecentItems) items, and cleared when the app quits. Clipboard Drop does not save history, sync content, or run a receiving service.")
-            }
         }
     }
 
@@ -65,18 +50,8 @@ struct ClipDropSettingsView: View {
             appName: config.appName,
             versionText: versionText
         ) {
-            KikiSettingsStatusRow(
-                title: "Status",
-                value: accessStore.snapshot.accountStatus,
-                systemImage: "heart.circle"
-            )
+            EmptyView()
         } links: {
-            KikiSettingsLinkRow(
-                title: "Official",
-                value: config.officialDisplayName,
-                urlString: config.officialURL,
-                systemImage: "globe"
-            )
             KikiSettingsCopyRow(
                 title: "Email",
                 value: config.contactEmailAddress,
@@ -84,7 +59,7 @@ struct ClipDropSettingsView: View {
             )
             KikiSettingsLinkRow(
                 title: "GitHub",
-                value: "GitHub",
+                value: config.repositoryDisplayName,
                 urlString: config.repositoryURL,
                 systemImage: "chevron.left.forwardslash.chevron.right"
             )

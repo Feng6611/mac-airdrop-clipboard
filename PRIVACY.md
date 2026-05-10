@@ -26,4 +26,4 @@ AirDrop delivery is handled by macOS. Clipboard Drop asks the system sharing ser
 
 ## Contact
 
-For questions, open an issue at <https://github.com/Feng6611/mac_airdrop_clipboard/issues>.
+For questions, open an issue at <https://github.com/Feng6611/mac-airdrop-clipboard/issues>.

@@ -32,6 +32,10 @@ final class ClipDropController: ObservableObject {
         historyStore.startMonitoring()
     }
 
+    func stopClipboardMonitoring() {
+        historyStore.stopMonitoring()
+    }
+
     func refreshClipboardHistory() {
         historyStore.syncCurrentClipboard()
     }
@@ -86,12 +90,6 @@ final class ClipDropController: ObservableObject {
             detailSummary = error.localizedDescription
             NSApp.presentError(error)
         }
-    }
-
-    func clearRecentItems() {
-        historyStore.clear()
-        statusSummary = "Recent items cleared"
-        detailSummary = "Clipboard Drop keeps no saved clipboard history."
     }
 
     static func versionSummary(version: String, build: String) -> String {

@@ -13,7 +13,7 @@ layer until there is a real platform-free boundary.
 
 - SwiftUI `App` entry point and `NSApplicationDelegate`.
 - Kiki menu bar and settings wiring.
-- App-level controller state and access store.
+- App-level controller state.
 - User-action routing from UI surfaces into platform services.
 
 App code may import AppKit, SwiftUI, and Kiki packages. Keep it focused on
@@ -26,8 +26,6 @@ coordination, not reusable UI or system-service details.
 - `MenuBar/`: SwiftUI popover content, recent item rows, action buttons, and
   menu-specific presentation extensions.
 - `Settings/`: Kiki settings shell usage and settings tab definitions.
-- `Access/`: access/paywall placeholder UI and display models.
-
 Feature code may import SwiftUI and Kiki. It should not create status items,
 own app lifecycle, or talk directly to pasteboard/AirDrop.
 

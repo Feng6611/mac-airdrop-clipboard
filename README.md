@@ -35,6 +35,10 @@ Use it for links, codes, commands, addresses, notes, snippets, and quick text ha
 | Text | `.txt`, `.md` |
 | URLs | URL file, `.txt` |
 
+## Icon Assets
+
+The current Icon Composer source is kept at [`ClipDrop.icon`](ClipDrop.icon), with a 1024px PNG export backed up at [`IconDesigns/ClipDrop-iOS-Default-1024x1024@1x.png`](IconDesigns/ClipDrop-iOS-Default-1024x1024@1x.png).
+
 ## How It Works
 
 Clipboard Drop reads the current text clipboard with `NSPasteboard`, writes a temporary UTF-8 file, and asks the system AirDrop sharing service to send it. The receiver does not need Clipboard Drop installed, paired, or signed in with the same Apple ID.
@@ -76,10 +80,11 @@ xcodebuild test -project ClipDrop.xcodeproj -scheme ClipDrop -destination 'platf
 
 Clipboard Drop follows a small macOS app structure:
 
-- `App/`: app lifecycle, Kiki wiring, controller state, and access store.
-- `Features/`: menu bar popover, settings scene, and access/paywall placeholder UI.
+- `App/`: app lifecycle, Kiki wiring, and controller state.
+- `Features/`: menu bar popover and settings scene.
 - `Platform/`: pasteboard monitoring, formatted text extraction, and AirDrop file sharing.
 - `Shared/`: app config, send preferences, links, and app-specific design tokens.
+- `IconDesigns/`: icon source files and exported icon backups.
 
 See [Docs/Architecture.md](Docs/Architecture.md) for the folder boundaries.
 

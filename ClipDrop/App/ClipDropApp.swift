@@ -10,9 +10,7 @@ struct ClipDropApp: App {
     var body: some Scene {
         Settings {
             ClipDropSettingsView(
-                config: appDelegate.config,
-                controller: appDelegate.controller,
-                accessStore: appDelegate.accessStore
+                config: appDelegate.config
             )
         }
     }
@@ -22,7 +20,6 @@ struct ClipDropApp: App {
 final class ClipDropAppDelegate: NSObject, NSApplicationDelegate {
     let config = ClipDropAppConfig.default
     let controller = ClipDropController()
-    let accessStore = ClipDropAccessStore()
 
     private let settingsWindowController = KikiSettingsWindowController(
         frameAutosaveName: "ClipDrop.SettingsWindow",
@@ -53,17 +50,19 @@ final class ClipDropAppDelegate: NSObject, NSApplicationDelegate {
             ClipDropMenuPopoverView(
                 config: self.config,
                 controller: self.controller,
-                accessStore: self.accessStore,
                 actions: ClipDropPopoverActions(
                     sendClipboard: { [weak self] in self?.controller.sendClipboardViaAirDrop() },
                     sendHistoryItem: { [weak self] item in self?.controller.sendHistoryItemViaAirDrop(item) },
                     copyHistoryItem: { [weak self] item in self?.controller.copyHistoryItem(item) },
-                    clearRecentItems: { [weak self] in self?.controller.clearRecentItems() },
                     openSettings: { [weak self] in self?.openSettings() },
                     quit: { NSApp.terminate(nil) }
                 )
             )
         }
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        controller.stopClipboardMonitoring()
     }
 
     private func openSettings() {

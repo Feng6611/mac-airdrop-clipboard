@@ -68,6 +68,7 @@ final class ClipboardSenderService {
         self.sharingProvider = sharingProvider ?? AirDropClipboardSharingProvider()
         self.now = now
         self.preferences = preferences
+        cleanupTemporaryFiles()
     }
 
     func sendClipboardViaAirDrop() throws -> ClipboardSendResult {
@@ -95,7 +96,7 @@ final class ClipboardSenderService {
     }
 
     private func writeTemporaryTextFile(for clipboardText: String, normalizedText: String) throws -> ClipboardTextFile {
-        let directory = fileManager.temporaryDirectory.appendingPathComponent("ClipboardDrop", isDirectory: true)
+        let directory = temporaryDirectory
         try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
 
         let timestamp = Self.timestamp(for: now())
@@ -119,6 +120,14 @@ final class ClipboardSenderService {
         try fileText.write(to: fileURL, atomically: true, encoding: .utf8)
 
         return ClipboardTextFile(kind: kind, fileURL: fileURL)
+    }
+
+    private var temporaryDirectory: URL {
+        fileManager.temporaryDirectory.appendingPathComponent("ClipboardDrop", isDirectory: true)
+    }
+
+    private func cleanupTemporaryFiles() {
+        try? fileManager.removeItem(at: temporaryDirectory)
     }
 
     private static func urlFileText(for url: URL, format: ClipDropURLSendFormat) -> String {

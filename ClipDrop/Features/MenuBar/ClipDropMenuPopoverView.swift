@@ -4,7 +4,6 @@ import SwiftUI
 struct ClipDropMenuPopoverView: View {
     let config: ClipDropAppConfig
     @ObservedObject var controller: ClipDropController
-    @ObservedObject var accessStore: ClipDropAccessStore
     let actions: ClipDropPopoverActions
     @State private var expandedItemIDs: Set<ClipboardHistoryItem.ID> = []
 
@@ -78,17 +77,6 @@ struct ClipDropMenuPopoverView: View {
                     .foregroundStyle(.secondary)
 
                 Spacer()
-
-                if !controller.historyItems.isEmpty {
-                    Button("Clear") {
-                        actions.clearRecentItems()
-                    }
-                    .buttonStyle(.borderless)
-                    .controlSize(.small)
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.secondary)
-                    .help("Clear recent items")
-                }
             }
             .padding(.horizontal, ClipDropDesignToken.Spacing.page)
             .padding(.top, ClipDropDesignToken.Spacing.sectionTop)
@@ -159,10 +147,6 @@ struct ClipDropMenuPopoverView: View {
             .help("Open settings")
 
             Spacer()
-
-            Text(accessStore.snapshot.accountStatus)
-                .font(.caption)
-                .foregroundStyle(.tertiary)
 
             Button {
                 actions.quit()
