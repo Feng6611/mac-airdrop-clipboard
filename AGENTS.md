@@ -20,6 +20,12 @@ Keep V1 narrow:
 - Keep AirDrop and pasteboard business logic in the app target, not in `Kiki_mackit`.
 - Keep SwiftUI/Kiki UI out of `Platform/`, and keep AppKit service code out of
   feature views.
+- Settings should stay on `KikiSettingsShell` and Kiki row components. Do not
+  add test-only Settings windows or duplicate panes. Use a Kiki row component
+  when the pinned `Kiki_mackit` dependency exposes one; otherwise keep the
+  local control small and note the future kit migration.
+- Menu, popover, and future UI smoke entry points should call the same
+  app-owned actions, such as `openSettings()` and `sendClipboardViaAirDrop()`.
 
 Recommended verification:
 

@@ -248,7 +248,7 @@ final class ClipDropTests: XCTestCase {
     func testVersionSummaryUsesStableFormat() {
         XCTAssertEqual(
             ClipDropController.versionSummary(version: "1.2.3", build: "45"),
-            "Clipboard Drop v1.2.3 (45)"
+            "Version 1.2.3 (45)"
         )
     }
 

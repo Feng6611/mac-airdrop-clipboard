@@ -26,6 +26,7 @@ coordination, not reusable UI or system-service details.
 - `MenuBar/`: SwiftUI popover content, recent item rows, action buttons, and
   menu-specific presentation extensions.
 - `Settings/`: Kiki settings shell usage and settings tab definitions.
+
 Feature code may import SwiftUI and Kiki. It should not create status items,
 own app lifecycle, or talk directly to pasteboard/AirDrop.
 
@@ -59,3 +60,18 @@ ceremonial.
 
 Add `Core/` only if a future rule can be tested and reused without SwiftUI,
 AppKit, Kiki, or app lifecycle state, or if a second runtime appears.
+
+## Action Entry Points
+
+User actions should have one app-owned entry point:
+
+- menu popover and future UI smoke paths call `openSettings()` for Settings;
+- send actions call `ClipDropController.sendClipboardViaAirDrop()` or the
+  matching history-item action;
+- settings rows only change app-local preferences and do not call platform
+  services directly.
+
+Settings uses `KikiSettingsShell`, `KikiAboutPane`, and Kiki row components
+available in the pinned `Kiki_mackit` dependency. Avoid duplicate Settings
+windows. When a desired Kiki row exists only in local kit and not in the pinned
+remote dependency, push/bump the dependency before adopting that API here.

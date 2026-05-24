@@ -93,6 +93,6 @@ final class ClipDropController: ObservableObject {
     }
 
     static func versionSummary(version: String, build: String) -> String {
-        "Clipboard Drop v\(version) (\(build))"
+        "Version \(version) (\(build))"
     }
 }

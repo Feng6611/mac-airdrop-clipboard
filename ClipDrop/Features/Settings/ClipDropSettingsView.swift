@@ -52,6 +52,12 @@ struct ClipDropSettingsView: View {
         ) {
             EmptyView()
         } links: {
+            KikiSettingsLinkRow(
+                title: "Official",
+                value: config.officialDisplayName,
+                urlString: config.officialURL,
+                systemImage: "globe"
+            )
             KikiSettingsCopyRow(
                 title: "Email",
                 value: config.contactEmailAddress,
