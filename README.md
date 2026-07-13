@@ -29,7 +29,7 @@
 
 > Requires macOS 14 Sonoma or later.
 
-**Download** the latest release from [Releases](https://github.com/Feng6611/mac_airdrop_clipboard/releases), unzip, and drag to `/Applications`.
+**[Download on the Mac App Store](https://apps.apple.com/app/id6768068044?pt=128417926&ct=readme)** — one-time purchase, no subscription.
 
 Or build from source:
 
@@ -92,6 +92,11 @@ See [Docs/Architecture.md](Docs/Architecture.md) for the codebase structure.
 ## Privacy
 
 Clipboard Drop collects no data. Everything runs locally on your Mac. See [PRIVACY.md](PRIVACY.md).
+
+## About
+
+Built by [chenfeng](https://github.com/Feng6611) — I make small,
+permission-light Mac utilities. More: [Command Reopen](https://commandreopen.com) · [Obsidian plugins](https://github.com/Feng6611)
 
 ## License
 
