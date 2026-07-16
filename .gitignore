@@ -4,6 +4,7 @@ DerivedData/
 build/
 *.xcuserstate
 xcuserdata/
+Config/LocalSecrets.xcconfig
 
 # Claude/Codex local overrides
 .claude/settings.local.json

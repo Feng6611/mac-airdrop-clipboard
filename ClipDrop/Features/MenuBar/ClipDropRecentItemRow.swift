@@ -2,101 +2,88 @@ import SwiftUI
 
 struct ClipDropRecentItemRow: View {
     let item: ClipboardHistoryItem
-    @Binding var isExpanded: Bool
     let isSending: Bool
+    let isSelected: Bool
     let send: () -> Void
     let copy: () -> Void
 
+    @State private var isHovering = false
+
     var body: some View {
-        HStack(spacing: 10) {
-            Rectangle()
-                .fill(item.contentType.tint.opacity(ClipDropDesignToken.Opacity.rowAccent))
-                .frame(width: 2)
-                .clipShape(Capsule())
+        HStack(spacing: ClipDropDesignToken.Spacing.rowHorizontal) {
+            Button(action: send) {
+                HStack(spacing: ClipDropDesignToken.Spacing.rowHorizontal) {
+                    contentTypeIcon
 
-            Image(systemName: item.contentType.systemImageName)
-                .symbolRenderingMode(.hierarchical)
-                .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(item.contentType.tint)
-                .frame(width: 18)
+                    Text(item.textForDisplay)
+                        .font(.body)
+                        .foregroundStyle(.primary)
+                        .lineLimit(3)
+                        .multilineTextAlignment(.leading)
 
-            DisclosureGroup(isExpanded: $isExpanded) {
-                expandedContent
-                    .padding(.top, 2)
-            } label: {
-                collapsedLabel
+                    Spacer(minLength: 4)
+                }
+                .contentShape(Rectangle())
             }
-            .disclosureGroupStyle(.automatic)
+            .buttonStyle(.plain)
+            .disabled(isSending)
+            .accessibilityLabel("Send \(item.contentType.displayName) via AirDrop")
+            .help("Send via AirDrop")
 
-            Spacer(minLength: 6)
+            ClipDropIconActionButton(
+                systemName: "doc.on.doc",
+                label: "Copy",
+                action: copy
+            )
+            .opacity(showsSecondaryActions ? 1 : 0)
+            .accessibilityHidden(!showsSecondaryActions)
 
-            HStack(spacing: 4) {
-                ClipDropIconActionButton(
-                    systemName: "doc.on.doc",
-                    label: "Copy",
-                    role: .secondary,
-                    action: copy
-                )
-
-                ClipDropIconActionButton(
-                    systemName: "paperplane.fill",
-                    label: "Send via AirDrop",
-                    role: .primary,
-                    action: send
-                )
-                .disabled(isSending)
-            }
+            ClipDropIconActionButton(
+                systemName: "paperplane",
+                label: "Send via AirDrop",
+                action: send
+            )
+            .disabled(isSending)
         }
+        .padding(.vertical, ClipDropDesignToken.Spacing.rowVertical)
+        .padding(.horizontal, ClipDropDesignToken.Spacing.rowHorizontal)
         .frame(minHeight: ClipDropDesignToken.Size.rowMinHeight)
-        .help(isExpanded ? "Collapse" : "Expand")
-    }
+        .background(rowBackground)
+        .contentShape(Rectangle())
+        .onHover { isHovering = $0 }
+        .contextMenu {
+            Button(action: send) {
+                Label("Send via AirDrop", systemImage: "paperplane")
+            }
+            .disabled(isSending)
 
-    @ViewBuilder
-    private var collapsedLabel: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text(item.contentType.displayName)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-
-            if !isExpanded {
-                Text(item.textForDisplay)
-                    .font(.body)
-                    .foregroundStyle(.primary)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
+            Button(action: copy) {
+                Label("Copy", systemImage: "doc.on.doc")
             }
         }
     }
 
-    @ViewBuilder
-    private var expandedContent: some View {
-        if let attributedText = item.swiftUIAttributedText {
-            Text(attributedText)
-                .font(.body)
-                .foregroundStyle(.primary)
-                .multilineTextAlignment(.leading)
-                .textSelection(.enabled)
-        } else {
-            Text(item.textForDisplay)
-                .font(.body)
-                .foregroundStyle(.primary)
-                .multilineTextAlignment(.leading)
-                .textSelection(.enabled)
-        }
+    private var showsSecondaryActions: Bool {
+        isHovering || isSelected
+    }
+
+    private var rowBackground: some View {
+        RoundedRectangle(cornerRadius: 6, style: .continuous)
+            .fill(isHovering || isSelected ? ClipDropDesignToken.Colors.rowHover : Color.clear)
+    }
+
+    private var contentTypeIcon: some View {
+        Image(systemName: item.contentType.systemImageName)
+            .symbolRenderingMode(.hierarchical)
+            .font(.body.weight(.medium))
+            .foregroundStyle(.secondary)
+            .frame(width: ClipDropDesignToken.Size.leadingIcon, height: ClipDropDesignToken.Size.leadingIcon)
+            .accessibilityHidden(true)
     }
 }
 
 private extension ClipboardHistoryItem {
     var textForDisplay: String {
         text.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    var swiftUIAttributedText: AttributedString? {
-        guard let attributedText else {
-            return nil
-        }
-
-        return try? AttributedString(attributedText, including: \.appKit)
     }
 }

@@ -4,10 +4,11 @@ import Foundation
 
 @MainActor
 final class ClipDropController: ObservableObject {
-    @Published private(set) var statusSummary = "Ready"
+    @Published private(set) var statusSummary = "Copy something to send"
     @Published private(set) var detailSummary = "Copy text or a link, then choose Send Clipboard via AirDrop."
     @Published private(set) var isSending = false
     @Published private(set) var historyItems: [ClipboardHistoryItem] = []
+    @Published private(set) var currentClipboardItem: ClipboardHistoryItem?
 
     private let sender: ClipboardSenderService
     private let historyStore: ClipboardHistoryStore
@@ -26,6 +27,15 @@ final class ClipDropController: ObservableObject {
                 self?.historyItems = items
             }
             .store(in: &cancellables)
+
+        self.historyStore.$currentItem
+            .sink { [weak self] item in
+                self?.currentClipboardItem = item
+                if item != nil, self?.statusSummary == "Copy something to send" {
+                    self?.statusSummary = "Ready to send"
+                }
+            }
+            .store(in: &cancellables)
     }
 
     func startClipboardMonitoring() {
@@ -40,8 +50,22 @@ final class ClipDropController: ObservableObject {
         historyStore.syncCurrentClipboard()
     }
 
+    var hasSendableCurrentClipboard: Bool {
+        currentClipboardItem != nil
+    }
+
+    func reportMissingClipboard() {
+        statusSummary = "Nothing to send"
+        detailSummary = ClipboardSenderError.emptyClipboard.localizedDescription
+    }
+
     func sendClipboardViaAirDrop() {
         guard !isSending else {
+            return
+        }
+
+        guard let currentClipboardItem else {
+            reportMissingClipboard()
             return
         }
 
@@ -49,10 +73,9 @@ final class ClipDropController: ObservableObject {
         defer { isSending = false }
 
         do {
-            let result = try sender.sendClipboardViaAirDrop()
+            let result = try sender.sendTextViaAirDrop(currentClipboardItem.text)
             statusSummary = result.status
             detailSummary = result.detail
-            historyStore.syncCurrentClipboard()
         } catch {
             statusSummary = "Nothing sent"
             detailSummary = error.localizedDescription
@@ -72,7 +95,6 @@ final class ClipDropController: ObservableObject {
             let result = try sender.sendTextViaAirDrop(item.text)
             statusSummary = result.status
             detailSummary = result.detail
-            historyStore.record(item.text, contentType: item.contentType, attributedText: item.attributedText)
         } catch {
             statusSummary = "Nothing sent"
             detailSummary = error.localizedDescription
@@ -90,6 +112,12 @@ final class ClipDropController: ObservableObject {
             detailSummary = error.localizedDescription
             NSApp.presentError(error)
         }
+    }
+
+    func clearClipboardHistory() {
+        historyStore.clear()
+        statusSummary = "History cleared"
+        detailSummary = "Clipboard history is empty. New copied text will appear here."
     }
 
     static func versionSummary(version: String, build: String) -> String {

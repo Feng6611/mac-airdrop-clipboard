@@ -1,0 +1,5 @@
+// Shared RevenueCat build settings. LocalSecrets.xcconfig is intentionally
+// optional so local builds can use an ignored key file. CI should pass
+// CLIPDROP_REVENUECAT_API_KEY as an xcodebuild setting.
+CLIPDROP_REVENUECAT_API_KEY =
+#include? "LocalSecrets.xcconfig"
