@@ -1,5 +1,6 @@
 import AppKit
 import KikiCommerceCore
+import KikiOnboarding
 import KikiSettings
 
 @MainActor
@@ -8,6 +9,7 @@ final class ClipDropAppRouter {
     private let accessManager: KikiAccessManager
     private let settingsRoute: ClipDropSettingsRouteModel
     private let settingsCoordinator: KikiSettingsCoordinator<ClipDropSettingsTab>
+    private let onboardingCoordinator: KikiOnboardingCoordinator
     private let quitApplication: () -> Void
     private let presentAccessVerificationError: () -> Void
     private var accessRefreshTask: Task<Void, Never>?
@@ -18,6 +20,7 @@ final class ClipDropAppRouter {
         accessManager: KikiAccessManager,
         settingsRoute: ClipDropSettingsRouteModel,
         settingsCoordinator: KikiSettingsCoordinator<ClipDropSettingsTab>,
+        onboardingCoordinator: KikiOnboardingCoordinator,
         quitApplication: (() -> Void)? = nil,
         presentAccessVerificationError: (() -> Void)? = nil
     ) {
@@ -25,6 +28,7 @@ final class ClipDropAppRouter {
         self.accessManager = accessManager
         self.settingsRoute = settingsRoute
         self.settingsCoordinator = settingsCoordinator
+        self.onboardingCoordinator = onboardingCoordinator
         self.quitApplication = quitApplication ?? { NSApp.terminate(nil) }
         self.presentAccessVerificationError = presentAccessVerificationError ?? Self.showAccessVerificationError
     }
@@ -64,6 +68,24 @@ final class ClipDropAppRouter {
         settingsCoordinator.select(.about)
         settingsRoute.isPaywallSheetPresented = true
         settingsCoordinator.open()
+    }
+
+    @discardableResult
+    func showAutomaticOnboardingIfAllowed() -> Bool {
+        guard accessManager.readiness.allowsAutomaticPresentation,
+              accessManager.status.isPro == false,
+              onboardingCoordinator.isCompleted == false,
+              settingsRoute.isPaywallSheetPresented == false else {
+            return false
+        }
+
+        onboardingCoordinator.start()
+        return true
+    }
+
+    func triggerOnboarding() {
+        onboardingCoordinator.resetCompletion()
+        onboardingCoordinator.start()
     }
 
     func quit() {

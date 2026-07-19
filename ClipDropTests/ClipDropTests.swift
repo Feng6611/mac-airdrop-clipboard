@@ -575,6 +575,132 @@ final class ClipDropTests: XCTestCase {
         XCTAssertFalse(manager.availablePlans.contains(where: \.isAvailable))
     }
 
+    func testOnboardingUsesTwoStepGuidedFlowBeforePaywall() {
+        let composition = ClipDropAppComposition(
+            defaults: makeCommerceDefaults(),
+            commerceClient: KikiInMemoryCommerceClient()
+        )
+
+        XCTAssertEqual(ClipDropOnboardingPhase.allCases, [.welcome, .workflow])
+        XCTAssertEqual(composition.onboardingCoordinator.configuration.steps.count, 1)
+        XCTAssertEqual(
+            composition.onboardingCoordinator.configuration.completionKey,
+            "ClipDrop.Onboarding.hasCompleted"
+        )
+        XCTAssertTrue(composition.onboardingCoordinator.canSkip)
+    }
+
+    func testOnboardingSessionIntroducesWorkflowThenPresentsPaywall() {
+        var finishCount = 0
+        let session = ClipDropOnboardingSession { finishCount += 1 }
+
+        XCTAssertEqual(session.phase, .welcome)
+        XCTAssertFalse(session.isPaywallPresented)
+
+        session.advance()
+        XCTAssertEqual(session.phase, .workflow)
+
+        session.back()
+        XCTAssertEqual(session.phase, .welcome)
+
+        session.advance()
+        session.advance()
+        XCTAssertTrue(session.isPaywallPresented)
+
+        session.complete()
+        session.complete()
+        XCTAssertEqual(finishCount, 1)
+    }
+
+    func testAutomaticOnboardingWaitsForAuthoritativeAccess() async {
+        let client = KikiInMemoryCommerceClient()
+        let composition = ClipDropAppComposition(
+            defaults: makeCommerceDefaults(),
+            commerceClient: client
+        )
+
+        XCTAssertFalse(composition.router.showAutomaticOnboardingIfAllowed())
+
+        await composition.accessManager.refresh()
+
+        XCTAssertTrue(composition.router.showAutomaticOnboardingIfAllowed())
+        composition.onboardingCoordinator.close()
+    }
+
+    func testAutomaticOnboardingDoesNotShowWhenAccessRefreshIsDegraded() async {
+        let client = KikiInMemoryCommerceClient()
+        client.refreshResult = .failure(.network)
+        let composition = ClipDropAppComposition(
+            defaults: makeCommerceDefaults(),
+            commerceClient: client
+        )
+
+        await composition.accessManager.refresh()
+
+        guard case .degraded = composition.accessManager.readiness else {
+            return XCTFail("Expected degraded access readiness")
+        }
+        XCTAssertFalse(composition.router.showAutomaticOnboardingIfAllowed())
+        XCTAssertFalse(composition.onboardingCoordinator.isVisible)
+    }
+
+    func testAutomaticOnboardingSkipsExistingProUsers() async {
+        let entitlement = CommerceEntitlement(
+            plan: ClipDropPurchasePlan.lifetime.commercePlan,
+            productIdentifier: ClipDropRevenueCatConfiguration.lifetimeProductIdentifier,
+            entitlementIdentifier: ClipDropRevenueCatConfiguration.entitlementIdentifier,
+            expirationDate: nil,
+            originalPurchaseDate: Date(timeIntervalSince1970: 60_000)
+        )
+        let composition = ClipDropAppComposition(
+            defaults: makeCommerceDefaults(),
+            commerceClient: KikiInMemoryCommerceClient(entitlement: entitlement)
+        )
+
+        await composition.accessManager.refresh()
+
+        XCTAssertFalse(composition.router.showAutomaticOnboardingIfAllowed())
+        XCTAssertFalse(composition.onboardingCoordinator.isVisible)
+    }
+
+#if DEBUG
+    func testDebugOnboardingTriggerResetsCompletionAndPresentsFlow() {
+        let defaults = makeCommerceDefaults()
+        defaults.set(true, forKey: "ClipDrop.Onboarding.hasCompleted")
+        let composition = ClipDropAppComposition(
+            defaults: defaults,
+            commerceClient: KikiInMemoryCommerceClient()
+        )
+
+        XCTAssertTrue(composition.onboardingCoordinator.isCompleted)
+
+        composition.router.triggerOnboarding()
+
+        XCTAssertFalse(composition.onboardingCoordinator.isCompleted)
+        XCTAssertTrue(composition.onboardingCoordinator.isVisible)
+        composition.onboardingCoordinator.close()
+    }
+
+    func testDebugPaidAccessOverrideUsesProductAccessManager() {
+        let composition = ClipDropAppComposition(
+            defaults: makeCommerceDefaults(),
+            commerceClient: KikiInMemoryCommerceClient()
+        )
+
+        composition.accessManager.setDebugProAccessOverride(.trial)
+        XCTAssertEqual(composition.accessManager.debugProAccessOverride, .trial)
+        XCTAssertTrue(composition.accessManager.status.isActive)
+
+        composition.accessManager.setDebugProAccessOverride(.pro)
+        XCTAssertEqual(composition.accessManager.debugProAccessOverride, .pro)
+        XCTAssertTrue(composition.accessManager.status.isPro)
+
+        composition.accessManager.clearDebugProAccessOverride()
+        XCTAssertNil(composition.accessManager.debugProAccessOverride)
+        XCTAssertEqual(composition.accessManager.status, .notStarted)
+    }
+#endif
+
     private func makeCommerceDefaults() -> UserDefaults {
         let suiteName = "ClipDropTests.Commerce.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!

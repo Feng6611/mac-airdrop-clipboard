@@ -13,19 +13,19 @@ struct ClipDropPaywallSheetView: View {
             manager: accessManager,
             context: context,
             copy: KikiAccessPaywallCopy(
-                title: "Unlock Clipboard Drop Pro",
-                proSubtitle: "Send clipboard text and links via AirDrop whenever you need them.",
-                trialSubtitle: "Try every Pro feature for two days on this Mac.",
-                expiredSubtitle: "Your two-day trial has ended. Unlock Pro to keep sending.",
-                notStartedSubtitle: "Send clipboard text and links via AirDrop from your menu bar.",
+                title: "Clipboard Drop Pro",
+                proSubtitle: "Send copied text and links via AirDrop whenever you need them.",
+                trialSubtitle: "Your free trial is active. Unlock Pro for life whenever you're ready.",
+                expiredSubtitle: "Your 2-day trial has ended. Unlock Pro for life to keep sending.",
+                notStartedSubtitle: "Try Pro free for 2 days. No subscription or automatic charge.",
                 features: [
-                    "Send current clipboard via AirDrop",
-                    "Send any recent clipboard item again",
-                    "Keep your clipboard workflow local and private"
+                    "Send copied text and links with AirDrop",
+                    "Resend recent clipboard items from the menu bar",
+                    "No receiver app, account, or cloud sync"
                 ],
-                purchaseActionTitle: "Unlock Pro",
-                trialActionTitle: "Start 2-day trial",
-                restoreActionTitle: "Restore purchases"
+                purchaseActionTitle: "Unlock Pro for Life",
+                trialActionTitle: "Start Free 2-Day Trial",
+                restoreActionTitle: "Restore Purchases"
             ),
             footerLinks: footerLinks,
             tint: ClipDropDesignToken.Colors.brand,

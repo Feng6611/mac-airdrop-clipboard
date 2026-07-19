@@ -64,6 +64,7 @@ final class ClipDropLifecycleCoordinator {
         Task { @MainActor [weak self] in
             guard let self else { return }
             await self.router.refreshAccess()
+            self.router.showAutomaticOnboardingIfAllowed()
         }
     }
 

@@ -43,13 +43,19 @@ The production public SDK key is stored locally in the ignored file:
 CLIPDROP_REVENUECAT_API_KEY = appl_your_public_sdk_key
 ```
 
-Do not commit that file. Release builds reject `test_` keys; Debug builds may
-use a RevenueCat test key. For CI builds that do not materialize
-`LocalSecrets.xcconfig`, pass the key as an xcodebuild setting, for example:
+Do not commit that file. Clipboard Drop does not use RevenueCat Test Store:
+Debug is an Apple Development-signed Apple Sandbox build and Release is the
+production configuration. Both use the same `appl_` key, and every App Store
+configuration rejects `test_`. For CI builds that do not materialize
+`LocalSecrets.xcconfig`, pass the public key as an xcodebuild setting, for example:
 
 ```sh
 xcodebuild ... CLIPDROP_REVENUECAT_API_KEY="$CLIPDROP_REVENUECAT_API_KEY"
 ```
+
+The Xcode guard runs after the app resources are produced and validates the
+final built `Info.plist`, including the embedded key and production bundle ID.
+The build fails if injection was lost between the build setting and the app.
 
 ## Remaining release work
 
@@ -63,7 +69,9 @@ public API.
 ## Sandbox acceptance checklist
 
 - Fresh install shows Pro inactive and does not start the trial automatically.
-- Starting the trial enables both send entry points for two days.
+- The onboarding paywall makes **Start Free 2-Day Trial** the primary action;
+  closing or skipping it leaves the user Not Pro and does not start the clock.
+- Starting the trial explicitly enables both send entry points for two days.
 - Expiring the trial gates current-clipboard send and history resend while
   leaving copy/history/settings available.
 - Purchasing either product unlocks Pro and the About pane identifies the

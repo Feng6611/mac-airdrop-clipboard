@@ -2,6 +2,7 @@
 DerivedData/
 .build/
 build/
+.mas-release/
 *.xcuserstate
 xcuserdata/
 Config/LocalSecrets.xcconfig

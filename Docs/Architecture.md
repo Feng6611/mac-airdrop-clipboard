@@ -19,7 +19,8 @@ access behind the shared Kiki commerce boundary.
 - `ClipDropAppRouter`: the only route for send, settings, paywall, copy, and
   quit actions.
 - `ClipDropLifecycleCoordinator`: menu bar startup/shutdown and entitlement
-  refresh.
+  refresh, followed by the first-launch decision only when access readiness is
+  authoritative.
 
 App code may import AppKit, SwiftUI, and Kiki packages. Keep it focused on
 coordination, not reusable UI or system-service details.
@@ -34,6 +35,9 @@ coordination, not reusable UI or system-service details.
   instead of redundant section labels. The system `NSPopover` and SwiftUI list
   controls supply the visual treatment; the app owns product layout and actions.
 - `Settings/`: Kiki settings shell usage and settings tab definitions.
+- `Onboarding/`: a two-step app-owned introduction hosted by
+  `KikiOnboardingCoordinator`; the final action presents the shared onboarding
+  paywall as a sheet.
 
 Feature code may import SwiftUI and Kiki. It should not create status items,
 own app lifecycle, or talk directly to pasteboard/AirDrop. The Paywall feature
@@ -70,8 +74,17 @@ policy. Both lifetime products unlock the same `pro` entitlement:
 | Lifetime + Support | `dev.kkuk.clipboarddrop.pro.supporter` | `$10.99` |
 
 The trial is an explicit two-day local access trial. It starts only after the
-user taps **Start 2-day trial**; it is not represented as an Apple
+user clicks **Start Free 2-Day Trial**; it is not represented as an Apple
 introductory offer because these are lifetime non-consumables.
+
+On first launch, Clipboard Drop waits for an authoritative access refresh.
+Existing Pro users are not interrupted. Other new users see the product
+introduction before the onboarding paywall. Skipping or closing onboarding
+marks the introduction complete without starting the trial. The onboarding
+paywall makes the explicit trial action primary and keeps lifetime purchase and
+restore as alternatives. Settings keeps the lifetime purchase primary while
+the trial is still eligible, so a person who skipped onboarding can start it
+later. Closing a paywall never starts the trial or writes the trial start key.
 
 Current clipboard send and resend-history actions require active access
 (trial or purchased Pro). Copying history, viewing history, Settings, and Quit
@@ -111,6 +124,22 @@ Settings uses `KikiSettingsCoordinator`, `KikiStandardAboutPane`, and
 Avoid duplicate Settings
 windows. When a desired Kiki row exists only in local kit and not in the pinned
 remote dependency, push/bump the dependency before adopting that API here.
+
+Debug builds also expose a `Developer Testing` section in General Settings.
+It uses `KikiSettingsDebugPreviewRow` to drive the existing access manager's
+Live / Not Pro / Trial / Pro override and provides real-route Onboarding and
+Paywall buttons. The entire section is compiled out of Release builds.
+Debug builds also accept `--clipdrop-debug-open-settings` and
+`--clipdrop-debug-open-onboarding` so a menu-bar-only process can expose its
+real Settings or onboarding route to repeatable UI smoke checks.
+
+The shared About status row keeps the `Status` label and leading information
+icon neutral. Active, trial, lifetime, and expired icons are rendered beside
+the trailing value; inactive stays text-only to avoid a duplicate information
+icon. Inactive and expired access use system orange; trial and purchased Pro
+use the stable Clipboard Drop Pro accent `#CB30E0`. Lifetime therefore renders
+as a purple crown immediately before `Lifetime`, rather than coloring the row
+label.
 
 The external catalog setup and sandbox checklist live in
 [`Docs/RevenueCat.md`](RevenueCat.md). The repository intentionally keeps the

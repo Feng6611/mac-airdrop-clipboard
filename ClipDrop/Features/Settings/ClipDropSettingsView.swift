@@ -13,6 +13,7 @@ struct ClipDropSettingsView: View {
     let settingsCoordinator: KikiSettingsCoordinator<ClipDropSettingsTab>
     @ObservedObject var accessManager: KikiAccessManager
     @ObservedObject var route: ClipDropSettingsRouteModel
+    let onTriggerOnboarding: () -> Void
     @AppStorage(ClipDropPreferenceKeys.textFileFormat) private var textFileFormat = ClipDropSendPreferences.defaultTextFileFormat.rawValue
     @AppStorage(ClipDropPreferenceKeys.urlSendFormat) private var urlSendFormat = ClipDropSendPreferences.defaultURLSendFormat.rawValue
 
@@ -41,13 +42,13 @@ struct ClipDropSettingsView: View {
                 LaunchAtLogin.Toggle("Launch at Login")
             }
 
-            Section("Send Format") {
+            Section("File Formats") {
                 KikiSettingsHelperText(
-                    "Clipboard Drop sends text as lightweight files. Rich text styling is not preserved."
+                    "Clipboard Drop sends copied text and links as files. Rich text formatting isn’t preserved."
                 )
 
                 KikiSettingsSegmentedPickerRow(
-                    "Text file",
+                    "Copied text",
                     selection: $textFileFormat,
                     options: ClipDropTextFileFormat.allCases.map(\.rawValue),
                     systemImage: "doc.text",
@@ -57,7 +58,7 @@ struct ClipDropSettingsView: View {
                 }
 
                 KikiSettingsSegmentedPickerRow(
-                    "Link file",
+                    "Copied link",
                     selection: $urlSendFormat,
                     options: ClipDropURLSendFormat.allCases.map(\.rawValue),
                     systemImage: "link",
@@ -66,8 +67,50 @@ struct ClipDropSettingsView: View {
                     ClipDropURLSendFormat(rawValue: rawValue)?.title ?? rawValue
                 }
             }
+
+#if DEBUG
+            debugTestingSection
+#endif
         }
     }
+
+#if DEBUG
+    private var debugTestingSection: some View {
+        Section {
+            KikiSettingsDebugPreviewRow(
+                "Paid access",
+                selection: debugModeBinding,
+                options: KikiAccessDebugMode.allCases,
+                isOverrideActive: accessManager.debugProAccessOverride != nil,
+                optionTitle: { $0.displayName }
+            )
+
+            KikiSettingsValueRow("Test flows", systemImage: "play.rectangle") {
+                Button("Onboarding", action: onTriggerOnboarding)
+                Button("Paywall") {
+                    route.isPaywallSheetPresented = true
+                }
+            }
+        } header: {
+            Text("Developer Testing")
+        } footer: {
+            KikiSettingsHelperText("Debug only. Live clears the paid-access override.")
+        }
+    }
+
+    private var debugModeBinding: Binding<KikiAccessDebugMode> {
+        Binding(
+            get: { accessManager.debugProAccessOverride ?? .live },
+            set: { mode in
+                if mode == .live {
+                    accessManager.clearDebugProAccessOverride()
+                } else {
+                    accessManager.setDebugProAccessOverride(mode)
+                }
+            }
+        )
+    }
+#endif
 
     private var aboutPane: some View {
         KikiStandardAboutPane(
@@ -79,7 +122,7 @@ struct ClipDropSettingsView: View {
                 feedback: URL(string: config.contactEmailURL),
                 github: URL(string: config.repositoryURL)
             ),
-            tint: ClipDropDesignToken.Colors.brand
+            tint: ClipDropDesignToken.Colors.proAccent
         )
     }
 
@@ -88,7 +131,7 @@ struct ClipDropSettingsView: View {
         case .notStarted:
             return KikiAccessStatusPresentation(
                 tone: .neutral,
-                title: "Pro inactive",
+                title: "Not Pro",
                 subtitle: "Start a two-day trial or choose a lifetime unlock.",
                 actionTitle: "View options"
             )

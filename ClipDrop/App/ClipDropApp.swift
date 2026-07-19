@@ -12,7 +12,8 @@ struct ClipDropApp: App {
                 config: composition.definition.config,
                 settingsCoordinator: composition.settingsCoordinator,
                 accessManager: composition.accessManager,
-                route: composition.settingsRoute
+                route: composition.settingsRoute,
+                onTriggerOnboarding: composition.router.triggerOnboarding
             )
         }
     }
@@ -24,6 +25,20 @@ final class ClipDropAppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         composition.lifecycle.start()
+
+#if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        let composition = composition
+        if arguments.contains("--clipdrop-debug-open-settings") {
+            DispatchQueue.main.async {
+                composition.router.openSettings()
+            }
+        } else if arguments.contains("--clipdrop-debug-open-onboarding") {
+            DispatchQueue.main.async {
+                composition.router.triggerOnboarding()
+            }
+        }
+#endif
     }
 
     func applicationWillTerminate(_ notification: Notification) {

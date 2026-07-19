@@ -9,6 +9,13 @@ enum ClipDropDesignToken {
         /// Only used for the app identity mark and Pro CTAs — never inside the list.
         static let brand = Color(nsColor: brandNSColor)
 
+        /// Stable Pro status accent. Access states use this exact purple in Settings.
+        static let proAccent = Color(
+            red: 203.0 / 255.0,
+            green: 48.0 / 255.0,
+            blue: 224.0 / 255.0
+        )
+
         /// Neutral, system-grayscale fill for row hover / keyboard selection.
         static let rowHover = Color.primary.opacity(0.06)
 

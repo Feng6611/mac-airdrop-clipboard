@@ -57,6 +57,9 @@ one of these lifetime unlocks:
 
 Both unlock the same Pro features. The app uses Apple in-app purchases through
 RevenueCat; prices shown by the store may be localized by territory.
+On first launch, a short introduction explains the menu bar workflow before
+showing these options. The trial begins only when you choose **Start 2-day free
+trial**; it is not a subscription and does not renew or charge automatically.
 
 | Content | Available formats |
 |---|---|

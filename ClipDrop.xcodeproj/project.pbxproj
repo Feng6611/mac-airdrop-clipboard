@@ -45,6 +45,9 @@
 		A00100000000000000000029 /* KikiCommercePresentation in Frameworks */ = {isa = PBXBuildFile; productRef = A00B00000000000000000008 /* KikiCommercePresentation */; };
 		A0010000000000000000002A /* KikiCommerceCore in Frameworks */ = {isa = PBXBuildFile; productRef = A00B00000000000000000006 /* KikiCommerceCore */; };
 		A0010000000000000000002B /* KikiCommerceTesting in Frameworks */ = {isa = PBXBuildFile; productRef = A00B00000000000000000009 /* KikiCommerceTesting */; };
+		A0010000000000000000002C /* KikiOnboarding in Frameworks */ = {isa = PBXBuildFile; productRef = A00B0000000000000000000A /* KikiOnboarding */; };
+		A0010000000000000000002D /* KikiOnboarding in Frameworks */ = {isa = PBXBuildFile; productRef = A00B0000000000000000000A /* KikiOnboarding */; };
+		A0010000000000000000002E /* Features/Onboarding/ClipDropOnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000023 /* Features/Onboarding/ClipDropOnboardingFlow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,6 +92,7 @@
 		A00200000000000000000020 /* Features/Paywall/ClipDropPaywallSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Paywall/ClipDropPaywallSheetView.swift; sourceTree = "<group>"; };
 		A00200000000000000000021 /* Config/RevenueCat.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config/RevenueCat.xcconfig; sourceTree = "<group>"; };
 		A00200000000000000000022 /* Config/AppInfo.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Config/AppInfo.plist; sourceTree = "<group>"; };
+		A00200000000000000000023 /* Features/Onboarding/ClipDropOnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Onboarding/ClipDropOnboardingFlow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +107,7 @@
 				A00100000000000000000027 /* KikiCommerceCore in Frameworks */,
 				A00100000000000000000028 /* KikiRevenueCat in Frameworks */,
 				A00100000000000000000029 /* KikiCommercePresentation in Frameworks */,
+				A0010000000000000000002C /* KikiOnboarding in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -116,6 +121,7 @@
 				A00100000000000000000016 /* KikiWindow in Frameworks */,
 				A0010000000000000000002A /* KikiCommerceCore in Frameworks */,
 				A0010000000000000000002B /* KikiCommerceTesting in Frameworks */,
+				A0010000000000000000002D /* KikiOnboarding in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -181,6 +187,7 @@
 			isa = PBXGroup;
 			children = (
 				A00700000000000000000008 /* MenuBar */,
+				A00700000000000000000012 /* Onboarding */,
 				A00700000000000000000010 /* Paywall */,
 				A00700000000000000000009 /* Settings */,
 			);
@@ -214,6 +221,14 @@
 				A00200000000000000000020 /* Features/Paywall/ClipDropPaywallSheetView.swift */,
 			);
 			name = Paywall;
+			sourceTree = "<group>";
+		};
+		A00700000000000000000012 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				A00200000000000000000023 /* Features/Onboarding/ClipDropOnboardingFlow.swift */,
+			);
+			name = Onboarding;
 			sourceTree = "<group>";
 		};
 		A0070000000000000000000B /* Platform */ = {
@@ -278,10 +293,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A00800000000000000000001 /* Build configuration list for PBXNativeTarget "ClipDrop" */;
 			buildPhases = (
-				A00F00000000000000000001 /* Verify RevenueCat API Key */,
 				A00900000000000000000001 /* Sources */,
 				A00600000000000000000001 /* Frameworks */,
 				A00A00000000000000000001 /* Resources */,
+				A00F00000000000000000001 /* Verify RevenueCat API Key */,
 			);
 			buildRules = (
 			);
@@ -296,6 +311,7 @@
 				A00B00000000000000000006 /* KikiCommerceCore */,
 				A00B00000000000000000007 /* KikiRevenueCat */,
 				A00B00000000000000000008 /* KikiCommercePresentation */,
+				A00B0000000000000000000A /* KikiOnboarding */,
 			);
 			productName = ClipDrop;
 			productReference = A00200000000000000000008 /* ClipDrop.app */;
@@ -322,6 +338,7 @@
 				A00B00000000000000000005 /* KikiWindow */,
 				A00B00000000000000000006 /* KikiCommerceCore */,
 				A00B00000000000000000009 /* KikiCommerceTesting */,
+				A00B0000000000000000000A /* KikiOnboarding */,
 			);
 			productName = ClipDropTests;
 			productReference = A00200000000000000000009 /* ClipDropTests.xctest */;
@@ -400,6 +417,7 @@
 			inputPaths = (
 				"$(SRCROOT)/script/verify_revenuecat_api_key.sh",
 				"$(SRCROOT)/Config/RevenueCat.xcconfig",
+				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
 			);
 			name = "Verify RevenueCat API Key";
 			outputFileListPaths = (
@@ -439,6 +457,7 @@
 				A00100000000000000000024 /* Shared/ClipDropPurchasePlan.swift in Sources */,
 				A00100000000000000000025 /* Shared/ClipDropRevenueCatConfiguration.swift in Sources */,
 				A00100000000000000000026 /* Features/Paywall/ClipDropPaywallSheetView.swift in Sources */,
+				A0010000000000000000002E /* Features/Onboarding/ClipDropOnboardingFlow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -595,10 +614,11 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.kkuk.clipboarddrop;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) APPLE_SANDBOX";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -623,7 +643,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.kkuk.clipboarddrop;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -694,13 +714,14 @@
 		};
 /* End XCConfigurationList section */
 
+
 /* Begin XCRemoteSwiftPackageReference section */
 		A00D00000000000000000001 /* XCRemoteSwiftPackageReference "Kiki_mackit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Feng6611/Kiki_mackit.git";
 			requirement = {
 				kind = exactVersion;
-				version = 0.8.1;
+				version = 0.8.2;
 			};
 		};
 		A00D00000000000000000002 /* XCRemoteSwiftPackageReference "KikiCommerceKit" */ = {
@@ -708,7 +729,7 @@
 			repositoryURL = "https://github.com/Feng6611/KikiCommerceKit.git";
 			requirement = {
 				kind = exactVersion;
-				version = 0.1.1;
+				version = 0.1.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -753,6 +774,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A00D00000000000000000002 /* XCRemoteSwiftPackageReference "KikiCommerceKit" */;
 			productName = KikiCommerceTesting;
+		};
+		A00B0000000000000000000A /* KikiOnboarding */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A00D00000000000000000001 /* XCRemoteSwiftPackageReference "Kiki_mackit" */;
+			productName = KikiOnboarding;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
