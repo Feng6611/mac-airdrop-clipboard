@@ -132,8 +132,8 @@
 			isa = PBXGroup;
 			children = (
 				A0020000000000000000000A /* README.md */,
-					A0070000000000000000000F /* Docs */,
-					A00700000000000000000011 /* Config */,
+				A0070000000000000000000F /* Docs */,
+				A00700000000000000000011 /* Config */,
 				A00700000000000000000002 /* ClipDrop */,
 				A00700000000000000000003 /* ClipDropTests */,
 				A00700000000000000000004 /* Products */,
@@ -215,22 +215,6 @@
 			name = Settings;
 			sourceTree = "<group>";
 		};
-		A00700000000000000000010 /* Paywall */ = {
-			isa = PBXGroup;
-			children = (
-				A00200000000000000000020 /* Features/Paywall/ClipDropPaywallSheetView.swift */,
-			);
-			name = Paywall;
-			sourceTree = "<group>";
-		};
-		A00700000000000000000012 /* Onboarding */ = {
-			isa = PBXGroup;
-			children = (
-				A00200000000000000000023 /* Features/Onboarding/ClipDropOnboardingFlow.swift */,
-			);
-			name = Onboarding;
-			sourceTree = "<group>";
-		};
 		A0070000000000000000000B /* Platform */ = {
 			isa = PBXGroup;
 			children = (
@@ -269,6 +253,22 @@
 			name = Shared;
 			sourceTree = "<group>";
 		};
+		A0070000000000000000000F /* Docs */ = {
+			isa = PBXGroup;
+			children = (
+				A00200000000000000000019 /* Docs/Architecture.md */,
+			);
+			name = Docs;
+			sourceTree = "<group>";
+		};
+		A00700000000000000000010 /* Paywall */ = {
+			isa = PBXGroup;
+			children = (
+				A00200000000000000000020 /* Features/Paywall/ClipDropPaywallSheetView.swift */,
+			);
+			name = Paywall;
+			sourceTree = "<group>";
+		};
 		A00700000000000000000011 /* Config */ = {
 			isa = PBXGroup;
 			children = (
@@ -278,12 +278,12 @@
 			name = Config;
 			sourceTree = "<group>";
 		};
-		A0070000000000000000000F /* Docs */ = {
+		A00700000000000000000012 /* Onboarding */ = {
 			isa = PBXGroup;
 			children = (
-				A00200000000000000000019 /* Docs/Architecture.md */,
+				A00200000000000000000023 /* Features/Onboarding/ClipDropOnboardingFlow.swift */,
 			);
-			name = Docs;
+			name = Onboarding;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -631,8 +631,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = ClipDrop;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = ClipDrop/ClipDrop.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = Q3DZRXLGA3;
@@ -713,7 +711,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
 
 /* Begin XCRemoteSwiftPackageReference section */
 		A00D00000000000000000001 /* XCRemoteSwiftPackageReference "Kiki_mackit" */ = {

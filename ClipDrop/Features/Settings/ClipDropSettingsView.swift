@@ -99,13 +99,19 @@ struct ClipDropSettingsView: View {
     }
 
     private var debugModeBinding: Binding<KikiAccessDebugMode> {
-        Binding(
+        let accessManager = accessManager
+
+        return Binding(
             get: { accessManager.debugProAccessOverride ?? .live },
             set: { mode in
-                if mode == .live {
-                    accessManager.clearDebugProAccessOverride()
-                } else {
-                    accessManager.setDebugProAccessOverride(mode)
+                // A segmented Picker can reconcile selection while SwiftUI is
+                // rendering. Publish the access-state change in the next turn.
+                DispatchQueue.main.async {
+                    if mode == .live {
+                        accessManager.clearDebugProAccessOverride()
+                    } else {
+                        accessManager.setDebugProAccessOverride(mode)
+                    }
                 }
             }
         )
