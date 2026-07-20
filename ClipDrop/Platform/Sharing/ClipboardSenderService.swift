@@ -88,7 +88,7 @@ final class ClipboardSenderService {
         }
 
         return ClipboardSendResult(
-            status: "Sending text via AirDrop",
+            status: "AirDrop opened",
             detail: "\(textFile.kind.statusName): \(textFile.fileURL.lastPathComponent)",
             fileURL: textFile.fileURL,
             kind: textFile.kind

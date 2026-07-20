@@ -1,13 +1,31 @@
 {
-  "originHash" : "6a403dc385bfd7882a257d7841395832e67a71e50c84cf0cf00e5d677f417c3a",
+  "originHash" : "f834a8b627fc7afd37983b4f8a1a774f409856d496d81f8c2c33df71fa7879f3",
   "pins" : [
     {
       "identity" : "kiki_mackit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Feng6611/Kiki_mackit.git",
       "state" : {
-        "branch" : "main",
-        "revision" : "c46c2f3dfd0ac341145dbe80301d10e6d63da3d8"
+        "revision" : "a4f4ee12841e86300bccd28205133024680645e0",
+        "version" : "0.9.0"
+      }
+    },
+    {
+      "identity" : "kikicommercekit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Feng6611/KikiCommerceKit.git",
+      "state" : {
+        "revision" : "60fbd26bb26be3f6aca978a5760aad4850544b48",
+        "version" : "0.2.0"
+      }
+    },
+    {
+      "identity" : "purchases-ios-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RevenueCat/purchases-ios-spm.git",
+      "state" : {
+        "revision" : "a1bf83fc76099c3d801aa7fc2543c3b9e488cd00",
+        "version" : "5.67.0"
       }
     }
   ],

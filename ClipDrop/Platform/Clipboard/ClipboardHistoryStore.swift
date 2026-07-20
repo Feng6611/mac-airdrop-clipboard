@@ -15,6 +15,7 @@ enum ClipboardHistoryError: LocalizedError, Equatable {
 @MainActor
 final class ClipboardHistoryStore: ObservableObject {
     @Published private(set) var items: [ClipboardHistoryItem] = []
+    @Published private(set) var currentItem: ClipboardHistoryItem?
 
     private let pasteboard: NSPasteboard
     private let maxItemCount: Int
@@ -108,10 +109,12 @@ final class ClipboardHistoryStore: ObservableObject {
 
         lastChangeCount = pasteboard.changeCount
         record(item.text, contentType: item.contentType, attributedText: item.attributedText)
+        currentItem = matchingItem(for: item.text)
     }
 
     func clear() {
         items.removeAll()
+        currentItem = nil
         lastChangeCount = pasteboard.changeCount
         suppressedChangeCount = pasteboard.changeCount
     }
@@ -128,6 +131,7 @@ final class ClipboardHistoryStore: ObservableObject {
 
     private func captureCurrentClipboard() {
         guard let text = pasteboard.string(forType: .string) else {
+            currentItem = nil
             return
         }
 
@@ -140,6 +144,14 @@ final class ClipboardHistoryStore: ObservableObject {
             ),
             attributedText: attributedText
         )
+        currentItem = matchingItem(for: text)
+    }
+
+    private func matchingItem(for text: String) -> ClipboardHistoryItem? {
+        let normalized = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        return items.first { item in
+            item.text.trimmingCharacters(in: .whitespacesAndNewlines) == normalized
+        }
     }
 }
 

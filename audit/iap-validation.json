@@ -1,0 +1,31 @@
+{
+  "appId": "6768068044",
+  "iapCount": 2,
+  "summary": {
+    "errors": 0,
+    "warnings": 2,
+    "infos": 0,
+    "blocking": 2
+  },
+  "checks": [
+    {
+      "id": "iap.review_readiness.needs_attention",
+      "severity": "warning",
+      "message": "IAP \"Clipboard Drop Pro Lifetime\" (dev.kkuk.clipboarddrop.pro.lifetime) is MISSING_METADATA",
+      "remediation": "Complete required metadata for this in-app purchase in App Store Connect",
+      "field": "state",
+      "resourceType": "inAppPurchaseV2",
+      "resourceId": "6791174721"
+    },
+    {
+      "id": "iap.review_readiness.needs_attention",
+      "severity": "warning",
+      "message": "IAP \"Clipboard Drop Pro Supporter\" (dev.kkuk.clipboarddrop.pro.supporter) is MISSING_METADATA",
+      "remediation": "Complete required metadata for this in-app purchase in App Store Connect",
+      "field": "state",
+      "resourceType": "inAppPurchaseV2",
+      "resourceId": "6791174796"
+    }
+  ],
+  "strict": true
+}

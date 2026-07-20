@@ -29,7 +29,7 @@
 
 > Requires macOS 14 Sonoma or later.
 
-**[Download on the Mac App Store](https://apps.apple.com/app/id6768068044?pt=128417926&ct=readme)** — one-time purchase, no subscription.
+**[Download on the Mac App Store](https://apps.apple.com/app/id6768068044?pt=128417926&ct=readme)** — lifetime purchase, no subscription.
 
 Or build from source:
 
@@ -45,6 +45,21 @@ Or build from source:
 4. Pick a nearby device in the AirDrop picker
 
 The receiver does not need Clipboard Drop installed.
+
+## Clipboard Drop Pro
+
+Sending the current clipboard or resending a recent item is a Pro feature.
+Every install can start one explicit two-day trial. After the trial, choose
+one of these lifetime unlocks:
+
+- **Lifetime** — $6.99
+- **Lifetime + Support** — $10.99
+
+Both unlock the same Pro features. The app uses Apple in-app purchases through
+RevenueCat; prices shown by the store may be localized by territory.
+On first launch, a short introduction explains the menu bar workflow before
+showing these options. The trial begins only when you choose **Start 2-day free
+trial**; it is not a subscription and does not renew or charge automatically.
 
 | Content | Available formats |
 |---|---|
@@ -87,7 +102,8 @@ xcodebuild test -project ClipDrop.xcodeproj -scheme ClipDrop \
   -destination 'platform=macOS,arch=arm64'
 ```
 
-See [Docs/Architecture.md](Docs/Architecture.md) for the codebase structure.
+See [Docs/Architecture.md](Docs/Architecture.md) for the codebase structure and
+[Docs/RevenueCat.md](Docs/RevenueCat.md) for commerce setup and sandbox checks.
 
 ## Privacy
 
