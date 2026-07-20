@@ -156,12 +156,16 @@ final class ClipDropTests: XCTestCase {
         let fakeSharing = FakeClipboardSharingProvider()
         let sender = ClipboardSenderService(
             sharingProvider: fakeSharing,
-            now: { Date(timeIntervalSince1970: 0) }
+            now: { Date(timeIntervalSince1970: 0) },
+            preferences: {
+                ClipDropSendPreferences(urlSendFormat: .plainText)
+            }
         )
 
         let result = try sender.sendTextViaAirDrop("  https://example.com/path?q=one  ")
 
         XCTAssertEqual(result.kind, .url)
+        XCTAssertEqual(result.fileURL.pathExtension, "txt")
         XCTAssertEqual(try String(contentsOf: result.fileURL, encoding: .utf8), "https://example.com/path?q=one")
         XCTAssertEqual(fakeSharing.performedURLs, [result.fileURL])
     }
