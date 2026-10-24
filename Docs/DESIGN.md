@@ -32,8 +32,11 @@ Rules:
 - Every row has its SF Symbol in the leading slot (`KikiSettingsRowLabel`), the
   same size and color as every other row.
 - Explanations live only in section footers, never as a row inside the section.
-- Segmented controls share one width (`ClipDropDesignToken.Settings.segmentedWidth`
-  = 220 pt) so their trailing edges align.
+- Segmented controls align on the trailing edge and size to their labels, with
+  `ClipDropDesignToken.Settings.segmentedWidth` (220 pt) as the minimum frame.
+  (Changed 2026-10-24: the native segmented control does not stretch its
+  segments to a wider frame, so equal widths would need a Kiki change; System
+  Settings also mixes widths.)
 - Labels are sentence case; section headers are title case nouns.
 
 ## Shortcut field
