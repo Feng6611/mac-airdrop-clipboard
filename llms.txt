@@ -1,35 +1,28 @@
 # Clipboard Drop
 
-> Send copied text via AirDrop from the macOS menu bar.
+> Open-source macOS menu bar utility that sends clipboard contents to nearby devices via AirDrop.
 
-Clipboard Drop is a lightweight macOS menu bar app that reads clipboard text, writes it to a temporary file (.txt, .md, or .url), and hands it to AirDrop for quick transfer to nearby Apple devices.
+Clipboard Drop takes copied text, links, formatted text, or images on macOS and triggers the native sharing sheet to transfer them to a nearby phone, tablet, or computer via AirDrop. The recipient does not need to install any app or share an Apple Account, enabling quick transfers between different people's devices.
 
 ## Use case
-
-Universal Clipboard requires the same Apple ID and Handoff enabled on both devices. Clipboard Drop works with any nearby AirDrop-capable device regardless of account — useful for sending links, commands, code snippets, or notes across different Apple IDs.
+Send links, Wi-Fi passwords, code snippets, notes, or screenshots directly from a Mac to nearby devices without requiring Universal Clipboard, cloud sync, or matching accounts. It allows explicit transfers across different user accounts, with an on-screen QR code fallback for devices that cannot receive AirDrop.
 
 ## Key facts
-
-- macOS 14 Sonoma or later
-- Menu bar app (no Dock icon)
-- Sends text and HTTP/HTTPS URLs
-- Output formats: .txt, .md, .url (configurable)
-- Receiver needs no app installed — only AirDrop
-- Clipboard history is in-memory only, cleared on quit
-- No cloud sync, no accounts, no servers, no data collection
-- Open source, MIT licensed
-- Built with Swift, SwiftUI, AppKit
-
-## Architecture
-
-- App/: SwiftUI app entry, NSApplicationDelegate, controller
-- Features/: menu bar popover UI, settings UI
-- Platform/: NSPasteboard monitoring, NSSharingService AirDrop bridge
-- Shared/: app config, design tokens, send preferences
+- System requirements: macOS 13 Ventura or later.
+- Form factor: Menu bar application; runs with no Dock icon.
+- Content types and transfer formats: Links open directly in the receiver's web browser; plain text arrives as a `.txt` or `.md` file (user-configurable); rich text arrives as `.rtf`; images and screenshots arrive as PNG; files dropped on the icon are sent as the original files.
+- Entry points: Menu bar popover, right-clicking the menu bar icon, global keyboard shortcut, dragging text/links/images/files onto the menu bar icon, macOS Services menu ("Send with Clipboard Drop"), and Apple Shortcuts actions (`Send Text`, `Send Clipboard`, `Show QR Code`).
+- Features: Editing text in a small window before sending, multi-item batch selection, rich text formatting retention, QR code display for text or links (scannable by phone cameras), and open at login.
+- Operational boundaries: Does not sync clipboard automatically in the background; cannot send silently to a target device (device selection always occurs in the system sheet); does not receive incoming transfers on macOS.
+- Privacy and storage: No network permission (cannot access the internet); no data collection or analytics; no Accessibility permission required; recent items stored strictly in memory and cleared on quit; temporary send files deleted after each send (about 10 minutes after a confirmed send, immediately after a failure or cancellation).
+- Pricing and licensing: Free with no in-app purchases, ads, or account requirements; open source under the MIT License.
+- Technology stack: Swift, SwiftUI, AppKit.
 
 ## Links
-
-- Repository: https://github.com/Feng6611/mac_airdrop_clipboard
-- Issues: https://github.com/Feng6611/mac_airdrop_clipboard/issues
-- Privacy policy: https://github.com/Feng6611/mac_airdrop_clipboard/blob/main/PRIVACY.md
+- Mac App Store: https://apps.apple.com/app/id6768068044
+- Repository: https://github.com/Feng6611/mac-airdrop-clipboard
+- Issues: https://github.com/Feng6611/mac-airdrop-clipboard/issues
+- Privacy policy: https://github.com/Feng6611/mac-airdrop-clipboard/blob/main/PRIVACY.md
+- Website: https://clipboarddrop.kkuk.dev/
+- Author: https://github.com/Feng6611
 - License: MIT
