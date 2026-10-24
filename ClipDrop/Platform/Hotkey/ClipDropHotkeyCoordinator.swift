@@ -68,7 +68,7 @@ final class ClipDropHotkeyCoordinator: ObservableObject {
         for action in ClipDropHotkeyAction.allCases {
             guard let shortcut = shortcuts[action] else { continue }
             if let existingAction = registered[shortcut] {
-                failureReasons[action] = "This shortcut conflicts with \(existingAction.title)."
+                failureReasons[action] = "This shortcut is already used for \(existingAction.title)."
                 continue
             }
 
@@ -80,7 +80,7 @@ final class ClipDropHotkeyCoordinator: ObservableObject {
             } catch let error as ClipDropHotkeyRegistrationError {
                 failureReasons[action] = error.userMessage
             } catch {
-                failureReasons[action] = "macOS could not register this shortcut."
+                failureReasons[action] = "This shortcut couldn’t be registered. Try another."
             }
         }
     }

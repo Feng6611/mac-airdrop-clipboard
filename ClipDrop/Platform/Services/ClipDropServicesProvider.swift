@@ -71,7 +71,7 @@ final class ClipDropServicesProvider: NSObject {
         error: AutoreleasingUnsafeMutablePointer<NSString?>
     ) {
         guard receive(pasteboard) else {
-            error.pointee = "Clipboard Drop could not read text, a link, an image, or a file." as NSString
+            error.pointee = "No supported content found to send." as NSString
             return
         }
     }

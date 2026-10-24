@@ -101,13 +101,13 @@ final class ClipDropEntryPointTests: XCTestCase {
 
         XCTAssertEqual(
             coordinator.failureReason(for: .showQRCode),
-            "This shortcut conflicts with Send clipboard."
+            "This shortcut is already used for Send clipboard."
         )
         XCTAssertEqual(registrar.registeredActions, [.sendClipboard])
 
         registrar.failureForAction = .sendClipboard
         coordinator.setShortcut(.defaultSendClipboard, for: .sendClipboard)
-        XCTAssertEqual(coordinator.failureReason(for: .sendClipboard), "This shortcut is already in use.")
+        XCTAssertEqual(coordinator.failureReason(for: .sendClipboard), "This shortcut is already in use. Choose another.")
         coordinator.setShortcut(nil, for: .sendClipboard)
         let reloaded = ClipDropHotkeyCoordinator(
             defaults: defaults,
@@ -212,13 +212,13 @@ final class ClipDropEntryPointTests: XCTestCase {
             "Show QR Code for Clipboard",
             "separator",
             "Settings…",
-            "Quit"
+            "Quit Clipboard Drop"
         ])
 
         for item in items {
             switch item {
             case let .action(title, _, _, _, _, _, _, action):
-                if ["Send Clipboard", "Show QR Code for Clipboard", "Quit"].contains(title) {
+                if ["Send Clipboard", "Show QR Code for Clipboard", "Quit Clipboard Drop"].contains(title) {
                     action()
                 }
             case let .settings(_, action):

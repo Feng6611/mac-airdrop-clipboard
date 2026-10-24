@@ -133,7 +133,7 @@ enum ClipDropContextMenuItems {
             .action(title: "Show QR Code for Clipboard", action: showQRCode),
             .separator,
             .settings(title: "Settings…", action: openSettings),
-            .action(title: "Quit", shortcut: .quit, action: quit)
+            .action(title: "Quit Clipboard Drop", shortcut: .quit, action: quit)
         ]
     }
 }

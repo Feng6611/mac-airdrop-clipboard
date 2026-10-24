@@ -83,9 +83,9 @@ enum ClipDropHotkeyRegistrationError: Error, Equatable {
     var userMessage: String {
         switch self {
         case .alreadyInUse:
-            return "This shortcut is already in use."
+            return "This shortcut is already in use. Choose another."
         case .failed(let status):
-            return "macOS could not register this shortcut (OSStatus \(status))."
+            return "This shortcut couldn’t be registered (error \(status))."
         }
     }
 }
