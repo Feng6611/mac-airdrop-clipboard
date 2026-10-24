@@ -31,8 +31,7 @@ final class ClipDropLifecycleCoordinator {
         )
         self.dropHandler = ClipDropDropHandler { [weak router] payload in
             guard let router else { return }
-            guard let routerPayload = payload.routerPayload else { return }
-            _ = await router.send(routerPayload, source: .drop)
+            _ = await router.send(payload, source: .drop)
         }
     }
 
@@ -70,7 +69,13 @@ final class ClipDropLifecycleCoordinator {
                     openSettings: { [weak self] in self?.router.openSettings() },
                     quit: { [weak self] in self?.router.quit() }
                 )
-            }
+            },
+            dropConfiguration: KikiMenuBarDropConfiguration(
+                acceptedTypes: ClipDropDropHandler.acceptedPasteboardTypes,
+                onDrop: { [weak self] pasteboard in
+                    self?.dropHandler.handle(pasteboard) ?? false
+                }
+            )
         ) {
             ClipDropMenuPopoverView(
                 config: self.definition.config,

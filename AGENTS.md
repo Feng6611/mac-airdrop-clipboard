@@ -1,7 +1,7 @@
 # Clipboard Drop Agent Notes
 
 Clipboard Drop is a focused macOS menu bar app built on the free Base modules
-from `Kiki_mackit` 0.11.0. Read `Docs/Architecture.md` before structural changes.
+from `Kiki_mackit` 0.12.0. Read `Docs/Architecture.md` before structural changes.
 
 Keep the app organized by responsibility:
 

@@ -87,23 +87,33 @@ enum ClipDropDropPasteboardReader {
     }
 }
 
-/// The app-owned connection point for Kiki's upcoming popover drop callback.
+/// Reads menu-bar drops and turns accepted content into a Router payload.
 @MainActor
 final class ClipDropDropHandler {
-    private let send: (ClipDropEntryPayload) async -> Void
+    static let acceptedPasteboardTypes: [NSPasteboard.PasteboardType] = [
+        .string,
+        .URL,
+        .fileURL,
+        NSPasteboard.PasteboardType("public.png"),
+        NSPasteboard.PasteboardType("public.tiff")
+    ]
 
-    init(send: @escaping (ClipDropEntryPayload) async -> Void) {
+    private let send: (ClipDropPayload) async -> Void
+
+    init(send: @escaping (ClipDropPayload) async -> Void) {
         self.send = send
     }
 
-    func handle(_ pasteboard: NSPasteboard) {
-        guard let payload = ClipDropDropPayloadConverter.payload(
+    @discardableResult
+    func handle(_ pasteboard: NSPasteboard) -> Bool {
+        guard let entryPayload = ClipDropDropPayloadConverter.payload(
             for: ClipDropDropPasteboardReader.items(from: pasteboard)
-        ) else {
-            return
+        ), let routerPayload = entryPayload.routerPayload else {
+            return false
         }
         Task {
-            _ = await send(payload)
+            await send(routerPayload)
         }
+        return true
     }
 }

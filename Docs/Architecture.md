@@ -56,16 +56,14 @@ This layer may import AppKit. Its protocols and result types stay close to the
 service so tests can inject a deterministic provider.
 
 `Platform/Hotkey/` owns Carbon global-hotkey registration and shortcut
-serialization. `Platform/Services/` owns Services pasteboard reading, a
-task-local `ClipDropEntryPayload` for text, URLs, rich text, images, and file
-URLs, and the single drop-pasteboard handler seam. Its temporary Router bridge
-falls back to text for rich content and files until the content pipeline adds
-these cases to `ClipDropPayload` and the sharing implementation. AppKit
-Services are listed in `Config/AppInfo.plist`; after changing them, run
-`pbs -update` or log out and
-back in before expecting the Services menu to refresh. Kiki 0.11.0 does not
-provide popover drop callbacks, so `ClipDropDropHandler.handle(_:)` is ready for
-the Kiki 0.12 integration point.
+serialization. `Platform/Services/` owns Services pasteboard reading and drag
+pasteboard parsing. `ClipDropEntryPayload.routerPayload` maps text, URLs, rich
+text, PNG-encoded images, and file URLs into the shared `ClipDropPayload`.
+AppKit Services are listed in `Config/AppInfo.plist`; after changing them, run
+`pbs -update` or log out and back in before expecting the Services menu to
+refresh. Kiki 0.12.0's `KikiMenuBarDropConfiguration` accepts text, URL, file
+URL, PNG, and TIFF drops on the status item. `ClipDropDropHandler` converts the
+pasteboard and routes accepted content with source `.drop`.
 
 App Intents and their Shortcuts actions are app-owned. The Shortcuts actions are
 Send Text (required Text, optional Edit before sending; summary: “Send {Text}”),
@@ -141,9 +139,12 @@ components from the pinned Base package. The About pane has no access-status
 row. The app adds its repository, author profile, App Store rating, Command
 Reopen, Privacy, and Support links through `additionalLinks`.
 
-The Open at Login control uses Kiki 0.11.0's stable `LaunchAtLogin.Toggle`.
-After Kiki 0.12.0 ships, replace it with the approval-aware
-`KikiSettingsLaunchAtLoginRow` so a pending Login Items approval is explained.
+The Open at Login control uses `KikiLaunchAtLoginModel` and
+`KikiSettingsLaunchAtLoginRow`. The model keeps a `.requiresApproval` request
+checked and refreshes when the app becomes active; the row explains the pending
+approval and opens System Settings › Login Items. Kiki 0.12.0 changes
+`KikiSheetShell` material rendering on macOS 26, but ClipDrop does not use that
+shell directly, so there is no app call-site migration.
 
 Keep the Settings scene in the app target and do not add duplicate windows or
 test-only panes. The About links use Kiki's link-row component; Kiki itself is

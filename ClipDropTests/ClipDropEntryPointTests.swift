@@ -1,6 +1,7 @@
 import AppKit
 import Carbon.HIToolbox
 import KikiMenuBar
+import KikiSettings
 import XCTest
 @testable import ClipDrop
 
@@ -100,6 +101,42 @@ final class ClipDropEntryPointTests: XCTestCase {
         )
     }
 
+    func testDropHandlerAcceptsSupportedTypesAndSendsRouterPayload() async {
+        XCTAssertEqual(
+            Set(ClipDropDropHandler.acceptedPasteboardTypes),
+            Set([
+                NSPasteboard.PasteboardType.string,
+                .URL,
+                .fileURL,
+                NSPasteboard.PasteboardType("public.png"),
+                NSPasteboard.PasteboardType("public.tiff")
+            ])
+        )
+
+        let pasteboard = makePasteboard()
+        pasteboard.setString("Dropped note", forType: .string)
+        var sentPayload: ClipDropPayload?
+        let didSend = expectation(description: "The drop payload reaches the send route.")
+        let handler = ClipDropDropHandler { payload in
+            sentPayload = payload
+            didSend.fulfill()
+        }
+
+        XCTAssertTrue(handler.handle(pasteboard))
+        await fulfillment(of: [didSend], timeout: 1)
+        XCTAssertEqual(sentPayload, .text("Dropped note"))
+    }
+
+    func testLaunchAtLoginModelKeepsApprovalPendingAsEnabled() {
+        let service = FakeLaunchAtLoginService()
+        let model = KikiLaunchAtLoginModel(service: service, notificationCenter: NotificationCenter())
+
+        XCTAssertFalse(model.isOn)
+        XCTAssertEqual(model.set(true), .requiresApproval)
+        XCTAssertEqual(model.status, .requiresApproval)
+        XCTAssertTrue(model.isOn)
+    }
+
     func testContextMenuMapsAllRequestedActions() {
         var invoked: [String] = []
         let items = ClipDropContextMenuItems.make(
@@ -161,5 +198,17 @@ private final class FakeHotkeyRegistrar: ClipDropHotkeyRegistering {
 
     func unregisterAll() {
         registeredActions.removeAll()
+    }
+}
+
+private final class FakeLaunchAtLoginService: LaunchAtLoginService {
+    var status: LaunchAtLoginStatus = .notRegistered
+
+    func register() throws {
+        status = .requiresApproval
+    }
+
+    func unregister() throws {
+        status = .notRegistered
     }
 }
