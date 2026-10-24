@@ -187,13 +187,13 @@ private struct ClipDropOnboardingFlowView: View {
                 ),
                 KikiOnboardingRow(
                     systemImage: "number.circle",
-                    title: "AirDrop code",
-                    detail: "On macOS and iOS 26.2 or later, they may need to enter the code shown on their screen."
+                    title: "AirDrop Code",
+                    detail: "On macOS and iOS 26.2 or later, you may need to enter the code shown on their screen."
                 ),
                 KikiOnboardingRow(
                     systemImage: "person.2",
-                    title: "No shared Apple ID",
-                    detail: "You don’t need to use the same Apple ID."
+                    title: "No shared Apple Account",
+                    detail: "You don’t need to use the same Apple Account."
                 )
             ]
         }
