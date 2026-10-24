@@ -3,6 +3,8 @@ import Foundation
 enum ClipDropPreferenceKeys {
     static let textFileFormat = "ClipDrop.textFileFormat"
     static let urlSendFormat = "ClipDrop.urlSendFormat"
+    static let keepsFormatting = "ClipDrop.keepsFormatting"
+    static let editBeforeSending = "ClipDrop.editBeforeSending"
 }
 
 enum ClipDropTextFileFormat: String, CaseIterable, Identifiable {
@@ -31,6 +33,7 @@ enum ClipDropTextFileFormat: String, CaseIterable, Identifiable {
 }
 
 enum ClipDropURLSendFormat: String, CaseIterable, Identifiable {
+    case direct = "direct"
     case urlFile = "url"
     case plainText = "txt"
 
@@ -38,6 +41,8 @@ enum ClipDropURLSendFormat: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
+        case .direct:
+            return "Direct"
         case .urlFile:
             return "URL"
         case .plainText:
@@ -45,8 +50,10 @@ enum ClipDropURLSendFormat: String, CaseIterable, Identifiable {
         }
     }
 
-    var fileExtension: String {
+    var fileExtension: String? {
         switch self {
+        case .direct:
+            return nil
         case .urlFile:
             return "url"
         case .plainText:
@@ -57,10 +64,14 @@ enum ClipDropURLSendFormat: String, CaseIterable, Identifiable {
 
 struct ClipDropSendPreferences: Equatable {
     static let defaultTextFileFormat: ClipDropTextFileFormat = .plainText
-    static let defaultURLSendFormat: ClipDropURLSendFormat = .plainText
+    static let defaultURLSendFormat: ClipDropURLSendFormat = .direct
+    static let defaultKeepsFormatting = true
+    static let defaultEditBeforeSending = false
 
     let textFileFormat: ClipDropTextFileFormat
     let urlSendFormat: ClipDropURLSendFormat
+    let keepsFormatting: Bool
+    let editBeforeSending: Bool
 
     static var current: ClipDropSendPreferences {
         ClipDropSendPreferences(userDefaults: .standard)
@@ -68,10 +79,14 @@ struct ClipDropSendPreferences: Equatable {
 
     init(
         textFileFormat: ClipDropTextFileFormat = Self.defaultTextFileFormat,
-        urlSendFormat: ClipDropURLSendFormat = Self.defaultURLSendFormat
+        urlSendFormat: ClipDropURLSendFormat = Self.defaultURLSendFormat,
+        keepsFormatting: Bool = Self.defaultKeepsFormatting,
+        editBeforeSending: Bool = Self.defaultEditBeforeSending
     ) {
         self.textFileFormat = textFileFormat
         self.urlSendFormat = urlSendFormat
+        self.keepsFormatting = keepsFormatting
+        self.editBeforeSending = editBeforeSending
     }
 
     init(userDefaults: UserDefaults) {
@@ -80,5 +95,9 @@ struct ClipDropSendPreferences: Equatable {
 
         self.textFileFormat = textFormatRaw.flatMap(ClipDropTextFileFormat.init(rawValue:)) ?? Self.defaultTextFileFormat
         self.urlSendFormat = urlFormatRaw.flatMap(ClipDropURLSendFormat.init(rawValue:)) ?? Self.defaultURLSendFormat
+        self.keepsFormatting = userDefaults.object(forKey: ClipDropPreferenceKeys.keepsFormatting) as? Bool
+            ?? Self.defaultKeepsFormatting
+        self.editBeforeSending = userDefaults.object(forKey: ClipDropPreferenceKeys.editBeforeSending) as? Bool
+            ?? Self.defaultEditBeforeSending
     }
 }

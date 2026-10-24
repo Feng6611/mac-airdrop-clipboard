@@ -7,19 +7,24 @@ final class ClipDropController: ObservableObject {
     @Published private(set) var statusSummary = "Copy something to send"
     @Published private(set) var detailSummary = "Copy text or a link, then choose Send Clipboard via AirDrop."
     @Published private(set) var isSending = false
+    @Published private(set) var sendNotice: String?
     @Published private(set) var historyItems: [ClipboardHistoryItem] = []
     @Published private(set) var currentClipboardItem: ClipboardHistoryItem?
 
     private let sender: ClipboardSenderService
     private let historyStore: ClipboardHistoryStore
+    private let sendIndicatorTimeout: TimeInterval
+    private var displayedSendIDs: Set<UUID> = []
     private var cancellables: Set<AnyCancellable> = []
 
     init(
         sender: ClipboardSenderService? = nil,
-        historyStore: ClipboardHistoryStore? = nil
+        historyStore: ClipboardHistoryStore? = nil,
+        sendIndicatorTimeout: TimeInterval = 45
     ) {
         self.sender = sender ?? ClipboardSenderService()
         self.historyStore = historyStore ?? ClipboardHistoryStore()
+        self.sendIndicatorTimeout = sendIndicatorTimeout
         self.historyItems = self.historyStore.items
 
         self.historyStore.$items
@@ -64,18 +69,29 @@ final class ClipDropController: ObservableObject {
     }
 
     func send(_ payload: ClipDropPayload) async -> ClipboardSendOutcome {
-        guard !isSending else {
-            return .failure(.sendAlreadyInProgress)
+        sendNotice = nil
+        let sendID = UUID()
+        displayedSendIDs.insert(sendID)
+        isSending = true
+        let indicatorTimeout = Task { [weak self] in
+            let nanoseconds = UInt64(max(0, self?.sendIndicatorTimeout ?? 0) * 1_000_000_000)
+            try? await Task.sleep(nanoseconds: nanoseconds)
+            guard !Task.isCancelled else { return }
+            self?.displayedSendIDs.remove(sendID)
+            self?.isSending = self?.displayedSendIDs.isEmpty == false
         }
 
-        isSending = true
-        defer { isSending = false }
-
         let outcome = await sender.send(payload)
+        indicatorTimeout.cancel()
+        displayedSendIDs.remove(sendID)
+        isSending = !displayedSendIDs.isEmpty
         switch outcome {
-        case .success:
+        case .success(let receipt):
             statusSummary = "Sent"
-            detailSummary = "AirDrop confirmed the send."
+            detailSummary = receipt.usedFilenameFallback
+                ? "AirDrop sent file names because the app couldn’t access the files."
+                : "AirDrop confirmed the send."
+            sendNotice = receipt.usedFilenameFallback ? detailSummary : nil
         case .cancelled:
             statusSummary = "Send canceled"
             detailSummary = "No item was sent."

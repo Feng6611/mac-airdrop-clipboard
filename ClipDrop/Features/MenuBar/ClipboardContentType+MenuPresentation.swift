@@ -7,6 +7,10 @@ extension ClipboardContentType {
             return "textformat"
         case .link:
             return "link"
+        case .image:
+            return "photo"
+        case .files:
+            return "doc.on.doc"
         }
     }
 

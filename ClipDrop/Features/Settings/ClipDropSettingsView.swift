@@ -5,9 +5,6 @@ import SwiftUI
 struct ClipDropSettingsView: View {
     let config: ClipDropAppConfig
     let settingsCoordinator: KikiSettingsCoordinator<ClipDropSettingsTab>
-    @AppStorage(ClipDropPreferenceKeys.textFileFormat) private var textFileFormat = ClipDropSendPreferences.defaultTextFileFormat.rawValue
-    @AppStorage(ClipDropPreferenceKeys.urlSendFormat) private var urlSendFormat = ClipDropSendPreferences.defaultURLSendFormat.rawValue
-
     var body: some View {
         KikiSettingsCoordinatorView(coordinator: settingsCoordinator) { tab in
             switch tab {
@@ -25,31 +22,7 @@ struct ClipDropSettingsView: View {
                 LaunchAtLogin.Toggle("Launch at Login")
             }
 
-            Section("File Formats") {
-                KikiSettingsHelperText(
-                    "Clipboard Drop sends copied text and links as files. Rich text formatting isn’t preserved."
-                )
-
-                KikiSettingsSegmentedPickerRow(
-                    "Copied text",
-                    selection: $textFileFormat,
-                    options: ClipDropTextFileFormat.allCases.map(\.rawValue),
-                    systemImage: "doc.text",
-                    controlWidth: 180
-                ) { rawValue in
-                    ClipDropTextFileFormat(rawValue: rawValue)?.title ?? rawValue
-                }
-
-                KikiSettingsSegmentedPickerRow(
-                    "Copied link",
-                    selection: $urlSendFormat,
-                    options: ClipDropURLSendFormat.allCases.map(\.rawValue),
-                    systemImage: "link",
-                    controlWidth: 180
-                ) { rawValue in
-                    ClipDropURLSendFormat(rawValue: rawValue)?.title ?? rawValue
-                }
-            }
+            ClipDropSendSettingsSection()
         }
     }
 

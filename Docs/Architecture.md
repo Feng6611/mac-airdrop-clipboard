@@ -29,6 +29,8 @@ policy stay in the app.
 `Features/` owns app-facing UI:
 
 - `MenuBar/`: SwiftUI popover content, clipboard rows, and action closures.
+- `Compose/` and `QRCode/`: SwiftUI editor and QR views hosted by app-owned
+  panels and reached through router actions.
 - `Settings/`: Kiki settings shell, app preferences, and About links.
 - `Onboarding/`: a two-step introduction hosted by
   `KikiOnboardingCoordinator`; the final action completes onboarding.
@@ -41,9 +43,14 @@ app lifecycle, or talk directly to pasteboard/AirDrop services.
 `Platform/` owns direct macOS services:
 
 - `Clipboard/`: pasteboard monitoring, recent clipboard items, and formatted
-  text extraction. Recent items exist in memory only.
+  text extraction. It recognizes PNG/TIFF images, RTF/RTFD/HTML rich text,
+  HTTP(S) links, plain text, and Finder file URLs. Recent items exist in memory
+  only. Image history is capped at 20 MB per image and five image items; the
+  app's overall recent-item limit still applies.
 - `Sharing/`: temporary file creation and the `NSSharingService` AirDrop
-  delegate bridge.
+  delegate bridge. Text uses the selected `.txt` or `.md` format, rich text uses
+  `.rtf`, images use `.png`, direct links are passed as URL objects, and
+  accessible file URLs are passed through without copying.
 
 This layer may import AppKit. Its protocols and result types stay close to the
 service so tests can inject a deterministic provider.
@@ -53,8 +60,8 @@ service so tests can inject a deterministic provider.
 `Shared/` owns app-local values:
 
 - App name, bundle identifier, About URLs, limits, and design tokens.
-- `ClipDropPayload` (`.text`, `.url`) and `ClipDropSendSource` for every send
-  route. Future payload cases extend this contract.
+- `ClipDropPayload` (`.text`, `.url`, `.richText`, `.image`, `.files`) and
+  `ClipDropSendSource` for every send route.
 - Send-format preferences and app-prefixed UserDefaults keys.
 
 ## Send lifecycle
@@ -62,20 +69,38 @@ service so tests can inject a deterministic provider.
 Every send starts in `ClipDropAppRouter.send(_:source:)` or
 `sendCurrentClipboard(source:)`. The popover sends the current item with source
 `.popover` and recent rows with source `.history`. The router selects `.text` or
-`.url`, then delegates to the app controller and `ClipboardSenderService`.
+`.url` or another item payload, optionally opens the edit panel for text, then
+delegates to the app controller and `ClipboardSenderService`.
 
-The sharing service writes one temporary file using the selected text or URL
-format, sets itself as `NSSharingService.delegate`, and waits for a delegate
-result. `sharingService(_:didShareItems:)` means success;
+The sharing provider sets itself as `NSSharingService.delegate`, tracks every
+pending operation per service, and waits for a delegate result.
+`sharingService(_:didShareItems:)` means success;
 `sharingService(_:didFailToShareItems:error:)` means failure or cancellation.
 The result is returned asynchronously. The panel opening alone does not count
-as a send. The file is removed after every result, and the temporary directory
-is cleared when the sender initializes and when the app terminates.
+as a send. Failed or cancelled sends remove temporary files immediately;
+confirmed sends retain them for ten minutes so AirDrop can finish reading them.
+The temporary directory is cleared when the sender initializes and when the
+app terminates. The popover's sending indicator times out after 45 seconds, and
+an outstanding callback does not block another send.
 
-Text supports `.txt` and `.md`; links support plain `.txt` and `.url` shortcut
-files. The app target declares the App Sandbox but no network client
-entitlement. Clipboard Drop does not make network requests; macOS owns the
-AirDrop transport.
+Text supports `.txt` and `.md`. Links are passed directly as HTTP(S) URL objects
+by default, with `.txt` and `.url` shortcut files as fallbacks. Rich text is
+serialized as `.rtf` when “Keep formatting” is enabled; RTFD pasteboard content
+is downgraded to one RTF file, so embedded attachments may be simplified. When
+formatting is disabled, rich text uses the selected `.txt` or `.md` format.
+
+Finder file URLs are checked for sandbox access and passed directly to the
+sharing service without copying when accessible. If the app cannot access a
+file URL, it sends the selected file names as a text file instead and shows a
+notice in the popover. Any security-scoped access stays open for the same
+ten-minute window. The app target declares the App Sandbox but no network
+client entitlement. Clipboard Drop does not make network requests; macOS owns
+the AirDrop transport.
+
+`ClipDropAppRouter.showQRCode(for:)` opens a local Core Image QR panel for text,
+links, and rich text. It uses correction level M and rejects UTF-8 payloads over
+2,331 bytes. The Compose and QR panels are app-owned windows; feature views
+receive their data and actions from the router.
 
 ## Launch and review behavior
 
@@ -105,11 +130,11 @@ not modified for this app-specific list.
 ## Data boundaries
 
 Clipboard history is process-memory state and disappears on quit. Clipboard
-content is written to disk only as the temporary file needed for the current
-AirDrop operation. That file is removed after the sharing callback and the
-dedicated temporary directory is cleared at startup and shutdown. There is no
-cloud sync, persistent clipboard history, receive-side automation, or app
-network client entitlement.
+content is written to disk only as a temporary file needed for the current
+AirDrop operation. Failed/cancelled files are removed after the callback;
+successful files expire after ten minutes, and the dedicated temporary
+directory is cleared at startup and shutdown. There is no cloud sync, persisted
+clipboard history, receive-side automation, or app network client entitlement.
 
 ## Optional Core
 

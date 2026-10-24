@@ -57,6 +57,15 @@ final class ClipDropLifecycleCoordinator {
                         guard let self else { return }
                         Task { await self.router.sendHistoryItem(item) }
                     },
+                    editAndSendHistoryItem: { [weak self] item in
+                        guard let self else { return }
+                        Task { await self.router.editAndSendHistoryItem(item) }
+                    },
+                    showQRCode: { [weak self] item in self?.router.showQRCode(for: item) },
+                    sendMergedItems: { [weak self] items in
+                        guard let self else { return }
+                        Task { await self.router.sendMergedItems(items, source: .popover) }
+                    },
                     copyHistoryItem: { [weak self] item in self?.router.copyHistoryItem(item) },
                     clearHistory: { [weak self] in self?.router.clearClipboardHistory() },
                     openSettings: { [weak self] in self?.router.openSettings() },

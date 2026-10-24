@@ -3,6 +3,8 @@ import SwiftUI
 struct ClipDropMenuPopoverView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var selectedItemID: ClipboardHistoryItem.ID?
+    @State private var mergeSelectionIDs: Set<ClipboardHistoryItem.ID> = []
+    @State private var isSelectionMode = false
     let config: ClipDropAppConfig
     @ObservedObject var controller: ClipDropController
     let actions: ClipDropPopoverActions
@@ -50,6 +52,10 @@ struct ClipDropMenuPopoverView: View {
 
     private var overflowMenu: some View {
         Menu {
+            Button(isSelectionMode ? "Cancel Selection" : "Select Items to Merge", action: toggleSelectionMode)
+                .disabled(!isSelectionMode && controller.historyItems.isEmpty)
+            Divider()
+
             if !controller.historyItems.isEmpty {
                 Button(role: .destructive, action: actions.clearHistory) {
                     Label("Clear History…", systemImage: "trash")
@@ -115,10 +121,14 @@ struct ClipDropMenuPopoverView: View {
             ForEach(controller.historyItems) { item in
                 ClipDropRecentItemRow(
                     item: item,
-                    isSending: controller.isSending,
                     isSelected: selectedItemID == item.id,
+                    isSelectionMode: isSelectionMode,
+                    isMergeSelected: mergeSelectionIDs.contains(item.id),
                     send: { selectAndSend(item) },
-                    copy: { selectAndCopy(item) }
+                    copy: { selectAndCopy(item) },
+                    editAndSend: { actions.editAndSendHistoryItem(item) },
+                    showQRCode: { actions.showQRCode(item) },
+                    toggleMergeSelection: { toggleMergeSelection(for: item) }
                 )
                 .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
                 .listRowBackground(Color.clear)
@@ -141,14 +151,46 @@ struct ClipDropMenuPopoverView: View {
     // MARK: Footer
 
     private var footer: some View {
-        HStack {
-            Spacer()
-
-            Button(action: actions.openSettings) {
-                Label("Settings", systemImage: "gearshape")
+        VStack(alignment: .leading, spacing: 4) {
+            if let sendNotice = controller.sendNotice {
+                Text(sendNotice)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .buttonStyle(.borderless)
-            .help("Open settings (⌘,)")
+
+            if isSelectionMode, hasUnmergeableSelection {
+                Text("Images and files can’t be merged.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            HStack {
+                if controller.isSending {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("Sending…")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                if isSelectionMode, !selectedMergeItems.isEmpty {
+                    Button(mergeSendTitle, action: sendMergedSelection)
+                        .disabled(ClipboardContentType.mergedText(from: selectedMergeItems) == nil)
+                    Button("Cancel", action: toggleSelectionMode)
+                        .buttonStyle(.borderless)
+                }
+
+                Button(action: actions.openSettings) {
+                    Label("Settings", systemImage: "gearshape")
+                }
+                .buttonStyle(.borderless)
+                .help("Open settings (⌘,)")
+            }
         }
     }
 
@@ -177,8 +219,22 @@ struct ClipDropMenuPopoverView: View {
         return controller.historyItems.first { $0.id == selectedItemID }
     }
 
+    private var selectedMergeItems: [ClipboardHistoryItem] {
+        controller.historyItems.filter { mergeSelectionIDs.contains($0.id) }
+    }
+
+    private var hasUnmergeableSelection: Bool {
+        selectedMergeItems.contains { $0.contentType == .image || $0.contentType == .files }
+    }
+
+    private var mergeSendTitle: String {
+        selectedMergeItems.count == 1
+            ? "Send 1 Item"
+            : "Send \(selectedMergeItems.count) Items"
+    }
+
     private func sendSelectedItem() {
-        guard !controller.isSending, let selectedItem else { return }
+        guard let selectedItem else { return }
         actions.sendHistoryItem(selectedItem)
     }
 
@@ -207,6 +263,7 @@ struct ClipDropMenuPopoverView: View {
 
     private func synchronizeSelection() {
         let itemIDs = controller.historyItems.map(\.id)
+        mergeSelectionIDs.formIntersection(itemIDs)
         if let selectedItemID, itemIDs.contains(selectedItemID) {
             return
         }
@@ -228,6 +285,35 @@ struct ClipDropMenuPopoverView: View {
 
         let nextIndex = min(max(currentIndex + offset, itemIDs.startIndex), itemIDs.index(before: itemIDs.endIndex))
         self.selectedItemID = itemIDs[nextIndex]
+    }
+
+    private func toggleSelectionMode() {
+        if isSelectionMode {
+            cancelSelection()
+            return
+        }
+        mergeSelectionIDs.removeAll()
+        isSelectionMode = true
+    }
+
+    private func cancelSelection() {
+        mergeSelectionIDs.removeAll()
+        isSelectionMode = false
+    }
+
+    private func toggleMergeSelection(for item: ClipboardHistoryItem) {
+        if mergeSelectionIDs.contains(item.id) {
+            mergeSelectionIDs.remove(item.id)
+        } else {
+            mergeSelectionIDs.insert(item.id)
+        }
+    }
+
+    private func sendMergedSelection() {
+        guard ClipboardContentType.mergedText(from: selectedMergeItems) != nil else { return }
+        actions.sendMergedItems(selectedMergeItems)
+        mergeSelectionIDs.removeAll()
+        isSelectionMode = false
     }
 
 }
