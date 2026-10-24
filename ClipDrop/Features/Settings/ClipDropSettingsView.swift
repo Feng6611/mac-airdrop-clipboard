@@ -5,6 +5,8 @@ import SwiftUI
 struct ClipDropSettingsView: View {
     let config: ClipDropAppConfig
     let settingsCoordinator: KikiSettingsCoordinator<ClipDropSettingsTab>
+    let shortcutCoordinator: ClipDropHotkeyCoordinator
+
     var body: some View {
         KikiSettingsCoordinatorView(coordinator: settingsCoordinator) { tab in
             switch tab {
@@ -18,9 +20,7 @@ struct ClipDropSettingsView: View {
 
     private var generalPane: some View {
         KikiSettingsPane {
-            Section("Startup") {
-                LaunchAtLogin.Toggle("Launch at Login")
-            }
+            ClipDropShortcutSettingsSection(shortcutCoordinator: shortcutCoordinator)
 
             ClipDropSendSettingsSection()
         }

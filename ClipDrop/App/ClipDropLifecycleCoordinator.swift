@@ -7,6 +7,8 @@ final class ClipDropLifecycleCoordinator {
     private let controller: ClipDropController
     private let reviewRequests: ClipDropReviewRequestCoordinator
     private let router: ClipDropAppRouter
+    let shortcutCoordinator: ClipDropHotkeyCoordinator
+    let dropHandler: ClipDropDropHandler
     private var menuBarController: KikiMenuBarPopoverController<ClipDropMenuPopoverView>?
     private var didStart = false
 
@@ -20,6 +22,18 @@ final class ClipDropLifecycleCoordinator {
         self.controller = controller
         self.reviewRequests = reviewRequests
         self.router = router
+        self.shortcutCoordinator = ClipDropHotkeyCoordinator(
+            sendClipboard: { [weak router] in
+                guard let router else { return }
+                Task { await router.sendCurrentClipboard(source: .hotkey) }
+            },
+            showQRCode: { [weak router] in router?.showQRCodeForCurrentClipboard() }
+        )
+        self.dropHandler = ClipDropDropHandler { [weak router] payload in
+            guard let router else { return }
+            guard let routerPayload = payload.routerPayload else { return }
+            _ = await router.send(routerPayload, source: .drop)
+        }
     }
 
     func start() {
@@ -30,6 +44,7 @@ final class ClipDropLifecycleCoordinator {
 
         NSApp.setActivationPolicy(.accessory)
         controller.startClipboardMonitoring()
+        shortcutCoordinator.start()
         menuBarController = KikiMenuBarPopoverController(
             title: definition.config.statusItemTitle,
             autosaveName: definition.statusItemAutosaveName,
@@ -43,6 +58,18 @@ final class ClipDropLifecycleCoordinator {
             onWillShow: { [weak self] in
                 self?.controller.refreshClipboardHistory()
                 self?.reviewRequests.requestIfEligibleAtNaturalMoment()
+            },
+            contextMenuItems: { [weak self] in
+                guard let self else { return [] }
+                return ClipDropContextMenuItems.make(
+                    sendClipboard: { [weak self] in
+                        guard let self else { return }
+                        Task { await self.router.sendCurrentClipboard(source: .contextMenu) }
+                    },
+                    showQRCode: { [weak self] in self?.router.showQRCodeForCurrentClipboard() },
+                    openSettings: { [weak self] in self?.router.openSettings() },
+                    quit: { [weak self] in self?.router.quit() }
+                )
             }
         ) {
             ClipDropMenuPopoverView(
@@ -81,8 +108,27 @@ final class ClipDropLifecycleCoordinator {
             return
         }
         didStart = false
+        shortcutCoordinator.stop()
         controller.stopClipboardMonitoring()
         controller.cleanupTemporarySendFiles()
         menuBarController = nil
+    }
+}
+
+@MainActor
+enum ClipDropContextMenuItems {
+    static func make(
+        sendClipboard: @escaping () -> Void,
+        showQRCode: @escaping () -> Void,
+        openSettings: @escaping () -> Void,
+        quit: @escaping () -> Void
+    ) -> [KikiMenuItem] {
+        [
+            .action(title: "Send Clipboard", action: sendClipboard),
+            .action(title: "Show QR Code for Clipboard", action: showQRCode),
+            .separator,
+            .settings(title: "Settings…", action: openSettings),
+            .action(title: "Quit", shortcut: .quit, action: quit)
+        ]
     }
 }

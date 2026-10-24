@@ -63,6 +63,24 @@ final class ClipDropAppRouter {
         return await send(Self.payload(for: item), source: source)
     }
 
+    func showQRCodeForCurrentClipboard() {
+        controller.refreshClipboardHistory()
+        guard let item = controller.currentClipboardItem else {
+            controller.reportMissingClipboard()
+            return
+        }
+        showQRCode(for: Self.payload(for: item))
+    }
+
+    func sendTextFromIntent(_ text: String, editBeforeSending: Bool) async -> ClipboardSendOutcome {
+        let payload = Self.payload(fromEditedText: text)
+        guard editBeforeSending else {
+            return await send(payload, source: .intent)
+        }
+        guard let editedText = await presentComposeWindow(with: text) else { return .cancelled }
+        return await send(Self.payload(fromEditedText: editedText), source: .intent, didEditContent: true)
+    }
+
     func sendHistoryItem(_ item: ClipboardHistoryItem) async -> ClipboardSendOutcome {
         await sendHistoryItem(item, source: .history)
     }
