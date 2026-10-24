@@ -1,4 +1,3 @@
-import KikiCommerceCore
 import SwiftUI
 
 struct ClipDropMenuPopoverView: View {
@@ -6,7 +5,6 @@ struct ClipDropMenuPopoverView: View {
     @State private var selectedItemID: ClipboardHistoryItem.ID?
     let config: ClipDropAppConfig
     @ObservedObject var controller: ClipDropController
-    @ObservedObject var accessManager: KikiAccessManager
     let actions: ClipDropPopoverActions
 
     var body: some View {
@@ -143,16 +141,7 @@ struct ClipDropMenuPopoverView: View {
     // MARK: Footer
 
     private var footer: some View {
-        HStack(spacing: 8) {
-            if showsAccessButton {
-                Button(action: actions.openPaywall) {
-                    Label(accessButtonTitle, systemImage: "sparkles")
-                }
-                .buttonStyle(.borderless)
-                .foregroundStyle(ClipDropDesignToken.Colors.brand)
-                .help(accessButtonHelp)
-            }
-
+        HStack {
             Spacer()
 
             Button(action: actions.openSettings) {
@@ -241,38 +230,4 @@ struct ClipDropMenuPopoverView: View {
         self.selectedItemID = itemIDs[nextIndex]
     }
 
-    private var showsAccessButton: Bool {
-        guard !accessManager.status.isPro else {
-            return false
-        }
-        return accessManager.status.isActive || accessManager.readiness == .ready
-    }
-
-    private var accessButtonTitle: String {
-        switch accessManager.status {
-        case .notStarted:
-            return "Try Pro"
-        case .trial(.time(let daysRemaining, _)):
-            return "Trial · \(daysRemaining)d left"
-        case .trial(.usage):
-            return "Trial active"
-        case .expired:
-            return "Unlock Pro"
-        case .pro:
-            return "Pro"
-        }
-    }
-
-    private var accessButtonHelp: String {
-        switch accessManager.status {
-        case .notStarted:
-            return "Start a two-day trial or choose a lifetime unlock"
-        case .trial:
-            return "View lifetime Pro options"
-        case .expired:
-            return "Choose a lifetime Pro unlock"
-        case .pro:
-            return "View Pro access"
-        }
-    }
 }

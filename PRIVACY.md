@@ -18,7 +18,7 @@ Clipboard Drop does not save clipboard history to disk. Recent clipboard text ma
 
 ## Temporary Files
 
-When you send text, Clipboard Drop writes a temporary `.txt`, `.md`, or URL file so macOS can hand it to AirDrop. These files are written to the system temporary directory.
+When you send text or a link, Clipboard Drop writes a temporary `.txt`, `.md`, or URL file so macOS can hand it to AirDrop. Each file is deleted after the system sharing service reports success, failure, or cancellation. The temporary directory is also cleared when the app starts and quits.
 
 ## AirDrop
 

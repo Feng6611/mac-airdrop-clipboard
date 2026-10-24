@@ -1,67 +1,43 @@
 import AppKit
-import KikiCommerceCore
-import KikiCommerceTesting
+import Foundation
 import XCTest
 @testable import ClipDrop
 
 @MainActor
 final class ClipDropTests: XCTestCase {
     func testRecentClipboardPreviewsCollapseWhitespace() {
-        let item = ClipboardHistoryItem(
-            id: UUID(),
-            text: "hello\nworld\tfrom ClipDrop",
-            contentType: .text,
-            createdAt: Date()
-        )
-
+        let item = historyItem("hello\nworld\tfrom ClipDrop")
         XCTAssertEqual(item.preview, "hello world from ClipDrop")
     }
 
     func testRecentClipboardPreviewsTruncateAtSeventyCharacters() {
-        let item = ClipboardHistoryItem(
-            id: UUID(),
-            text: String(repeating: "a", count: 71),
-            contentType: .text,
-            createdAt: Date()
-        )
-
+        let item = historyItem(String(repeating: "a", count: 71))
         XCTAssertEqual(item.preview.count, 70)
         XCTAssertTrue(item.preview.hasSuffix("..."))
     }
 
     func testHistoryDeduplicatesAndCapsItems() {
-        let store = ClipboardHistoryStore(
-            pasteboard: NSPasteboard(name: NSPasteboard.Name(UUID().uuidString)),
-            maxItemCount: 3
-        )
-
+        let store = historyStore(maxItemCount: 3)
         store.record("one")
         store.record("two")
         store.record("three")
         store.record("two")
         store.record("four")
-
         XCTAssertEqual(store.items.map(\.text), ["four", "two", "three"])
     }
 
     func testHistoryRecordsContentTypes() {
-        let store = ClipboardHistoryStore(
-            pasteboard: NSPasteboard(name: NSPasteboard.Name(UUID().uuidString))
-        )
-
+        let store = historyStore()
         store.record("plain", contentType: .text)
         store.record("https://example.com", contentType: .link)
         store.record("rich", contentType: .formattedText)
-
         XCTAssertEqual(store.items.map(\.contentType), [.formattedText, .link, .text])
         XCTAssertEqual(store.items.map(\.contentType.displayName), ["Text (Formatted)", "Link", "Text"])
     }
 
     func testClearRecentItemsSuppressesCurrentPasteboardUntilItChanges() {
-        let pasteboard = NSPasteboard(name: NSPasteboard.Name(UUID().uuidString))
-        pasteboard.clearContents()
+        let pasteboard = namedPasteboard()
         pasteboard.setString("secret code", forType: .string)
-
         let store = ClipboardHistoryStore(pasteboard: pasteboard)
         store.syncCurrentClipboard()
         XCTAssertEqual(store.items.map(\.text), ["secret code"])
@@ -80,12 +56,10 @@ final class ClipDropTests: XCTestCase {
     }
 
     func testCopyHistoryItemWritesToPasteboard() throws {
-        let pasteboard = NSPasteboard(name: NSPasteboard.Name(UUID().uuidString))
+        let pasteboard = namedPasteboard()
         let store = ClipboardHistoryStore(pasteboard: pasteboard)
-        let item = ClipboardHistoryItem(id: UUID(), text: "copy me", contentType: .formattedText, createdAt: Date())
-
+        let item = historyItem("copy me", contentType: .formattedText)
         try store.copy(item)
-
         XCTAssertEqual(pasteboard.string(forType: .string), "copy me")
         XCTAssertEqual(store.items.map(\.text), ["copy me"])
         XCTAssertEqual(store.items.map(\.contentType), [.formattedText])
@@ -96,631 +70,311 @@ final class ClipDropTests: XCTestCase {
             ClipboardContentType.classify(text: "  https://example.com/path?q=one  ", hasFormattedRepresentation: true),
             .link
         )
-        XCTAssertEqual(
-            ClipboardContentType.classify(text: "ftp://example.com/file", hasFormattedRepresentation: false),
-            .text
-        )
+        XCTAssertEqual(ClipboardContentType.classify(text: "ftp://example.com/file", hasFormattedRepresentation: false), .text)
     }
 
     func testClipboardContentTypeClassifiesFormattedText() {
-        XCTAssertEqual(
-            ClipboardContentType.classify(text: "formatted", hasFormattedRepresentation: true),
-            .formattedText
-        )
+        XCTAssertEqual(ClipboardContentType.classify(text: "formatted", hasFormattedRepresentation: true), .formattedText)
     }
 
     func testPlainAttributedClipboardIsRecordedAsText() {
-        let pasteboard = NSPasteboard(name: NSPasteboard.Name(UUID().uuidString))
-        pasteboard.clearContents()
+        let pasteboard = namedPasteboard()
         pasteboard.writeObjects([NSAttributedString(string: "plain attributed")])
-
         let store = ClipboardHistoryStore(pasteboard: pasteboard)
         store.syncCurrentClipboard()
-
         XCTAssertEqual(store.items.map(\.contentType), [.text])
         XCTAssertNil(store.items.first?.attributedText)
     }
 
     func testStyledAttributedClipboardIsRecordedAsFormattedText() {
-        let pasteboard = NSPasteboard(name: NSPasteboard.Name(UUID().uuidString))
+        let pasteboard = namedPasteboard()
         let attributedString = NSMutableAttributedString(string: "styled text")
         attributedString.addAttribute(
             .font,
             value: NSFont.boldSystemFont(ofSize: NSFont.systemFontSize),
             range: NSRange(location: 0, length: 6)
         )
-        pasteboard.clearContents()
         pasteboard.writeObjects([attributedString])
-
         let store = ClipboardHistoryStore(pasteboard: pasteboard)
         store.syncCurrentClipboard()
-
         XCTAssertEqual(store.items.map(\.contentType), [.formattedText])
         XCTAssertEqual(store.items.first?.attributedText?.string, "styled text")
     }
 
-    func testEmptyClipboardSendFails() {
-        let pasteboard = NSPasteboard(name: NSPasteboard.Name(UUID().uuidString))
-        pasteboard.clearContents()
-        let sender = ClipboardSenderService(
-            pasteboard: pasteboard,
-            sharingProvider: FakeClipboardSharingProvider()
-        )
+    func testEmptyTextSendFailsBeforeOpeningAirDrop() async {
+        let provider = FakeClipboardSharingProvider()
+        let sender = makeSender(provider: provider)
+        let outcome = await sender.send(.text(" \n\t"))
+        XCTAssertEqual(outcome, .failure(.emptyClipboard))
+        XCTAssertTrue(provider.performedURLs.isEmpty)
+    }
 
-        XCTAssertThrowsError(try sender.sendClipboardViaAirDrop()) { error in
-            XCTAssertEqual(error as? ClipboardSenderError, .emptyClipboard)
+    func testTextCanBeSentAsMarkdownFile() async {
+        let provider = FakeClipboardSharingProvider()
+        let sender = makeSender(provider: provider, preferences: .init(textFileFormat: .markdown))
+        let outcome = await sender.send(.text("# Notes"))
+        guard case .success(let receipt) = outcome else { return XCTFail("Expected a confirmed share") }
+        XCTAssertEqual(receipt.kind, .text)
+        XCTAssertEqual(URL(fileURLWithPath: receipt.fileName).pathExtension, "md")
+        XCTAssertEqual(provider.capturedContents, ["# Notes"])
+    }
+
+    func testURLCanBeSentAsURLFile() async {
+        let provider = FakeClipboardSharingProvider()
+        let sender = makeSender(provider: provider, preferences: .init(urlSendFormat: .urlFile))
+        let outcome = await sender.send(.url(URL(string: "https://example.com/path?q=one")!))
+        guard case .success(let receipt) = outcome else { return XCTFail("Expected a confirmed share") }
+        XCTAssertEqual(receipt.kind, .url)
+        XCTAssertEqual(URL(fileURLWithPath: receipt.fileName).pathExtension, "url")
+        XCTAssertEqual(provider.capturedContents, ["[InternetShortcut]\nURL=https://example.com/path?q=one\n"])
+    }
+
+    func testURLCanBeSentAsPlainText() async {
+        let provider = FakeClipboardSharingProvider()
+        let sender = makeSender(provider: provider, preferences: .init(urlSendFormat: .plainText))
+        let outcome = await sender.send(.url(URL(string: "https://example.com/")!))
+        guard case .success(let receipt) = outcome else { return XCTFail("Expected a confirmed share") }
+        XCTAssertEqual(receipt.kind, .url)
+        XCTAssertEqual(URL(fileURLWithPath: receipt.fileName).pathExtension, "txt")
+        XCTAssertEqual(provider.capturedContents, ["https://example.com/"])
+    }
+
+    func testSendWaitsForDelegateResultAndDeletesFileAfterCallback() async throws {
+        let provider = FakeClipboardSharingProvider(completesImmediately: false)
+        let directory = temporaryDirectory()
+        let sender = makeSender(provider: provider, directory: directory)
+        let sendTask = Task { await sender.send(.text("send this exact text")) }
+
+        while provider.pendingCompletion == nil { await Task.yield() }
+        let fileURL = try XCTUnwrap(provider.performedURLs.first)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: fileURL.path))
+        XCTAssertEqual(try String(contentsOf: fileURL, encoding: .utf8), "send this exact text")
+
+        provider.complete(.shared)
+        let outcome = await sendTask.value
+        guard case .success = outcome else { return XCTFail("Expected the delegate success callback") }
+        XCTAssertFalse(FileManager.default.fileExists(atPath: fileURL.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: directory.path))
+    }
+
+    func testTemporaryFilesAreRemovedAfterFailureCancellationAndUnavailableService() async {
+        let results: [(ClipboardSharingResult, ClipboardSendOutcome)] = [
+            (.failed("Share failed"), .failure(.sharingFailed("Share failed"))),
+            (.cancelled, .cancelled),
+            (.unavailable, .failure(.airDropUnavailable))
+        ]
+
+        for (shareResult, expectedOutcome) in results {
+            let provider = FakeClipboardSharingProvider(result: shareResult)
+            let directory = temporaryDirectory()
+            let sender = makeSender(provider: provider, directory: directory)
+            let outcome = await sender.send(.text("temporary"))
+            XCTAssertEqual(outcome, expectedOutcome)
+            XCTAssertFalse(FileManager.default.fileExists(atPath: directory.path))
         }
     }
 
-    func testHttpURLsAreNormalizedIntoTextFile() throws {
-        let fakeSharing = FakeClipboardSharingProvider()
-        let sender = ClipboardSenderService(
-            sharingProvider: fakeSharing,
-            now: { Date(timeIntervalSince1970: 0) },
-            preferences: {
-                ClipDropSendPreferences(urlSendFormat: .plainText)
-            }
-        )
+    func testStartupAndShutdownClearTemporaryDirectory() async throws {
+        let directory = temporaryDirectory()
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let staleFile = directory.appendingPathComponent("stale.txt")
+        try "old clipboard".write(to: staleFile, atomically: true, encoding: .utf8)
 
-        let result = try sender.sendTextViaAirDrop("  https://example.com/path?q=one  ")
+        let provider = FakeClipboardSharingProvider(completesImmediately: false)
+        let sender = makeSender(provider: provider, directory: directory)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: staleFile.path))
 
-        XCTAssertEqual(result.kind, .url)
-        XCTAssertEqual(result.fileURL.pathExtension, "txt")
-        XCTAssertEqual(try String(contentsOf: result.fileURL, encoding: .utf8), "https://example.com/path?q=one")
-        XCTAssertEqual(fakeSharing.performedURLs, [result.fileURL])
+        let sendTask = Task { await sender.send(.text("active send")) }
+        while provider.pendingCompletion == nil { await Task.yield() }
+        XCTAssertTrue(FileManager.default.fileExists(atPath: directory.path))
+        sender.cleanupTemporaryFiles()
+        XCTAssertFalse(FileManager.default.fileExists(atPath: directory.path))
+        provider.complete(.cancelled)
+        let outcome = await sendTask.value
+        XCTAssertEqual(outcome, .cancelled)
     }
 
-    func testTextCanBeSentAsMarkdownFile() throws {
-        let sender = ClipboardSenderService(
-            sharingProvider: FakeClipboardSharingProvider(),
-            preferences: {
-                ClipDropSendPreferences(textFileFormat: .markdown)
-            }
-        )
-
-        let result = try sender.sendTextViaAirDrop("# Notes")
-
-        XCTAssertEqual(result.kind, .text)
-        XCTAssertEqual(result.fileURL.pathExtension, "md")
-        XCTAssertEqual(try String(contentsOf: result.fileURL, encoding: .utf8), "# Notes")
+    func testSharingFailureMapsCancellationSeparately() {
+        let cancelled = NSError(domain: NSCocoaErrorDomain, code: NSUserCancelledError)
+        let failed = NSError(domain: "AirDrop", code: 1, userInfo: [NSLocalizedDescriptionKey: "AirDrop failed"])
+        XCTAssertEqual(AirDropClipboardSharingProvider.result(for: cancelled), .cancelled)
+        XCTAssertEqual(AirDropClipboardSharingProvider.result(for: failed), .failed("AirDrop failed"))
     }
 
-    func testHttpURLsCanBeSentAsURLFiles() throws {
-        let sender = ClipboardSenderService(
-            sharingProvider: FakeClipboardSharingProvider(),
-            preferences: {
-                ClipDropSendPreferences(urlSendFormat: .urlFile)
-            }
-        )
-
-        let result = try sender.sendTextViaAirDrop("https://example.com/path?q=one")
-
-        XCTAssertEqual(result.kind, .url)
-        XCTAssertEqual(result.fileURL.pathExtension, "url")
-        XCTAssertEqual(
-            try String(contentsOf: result.fileURL, encoding: .utf8),
-            "[InternetShortcut]\nURL=https://example.com/path?q=one\n"
-        )
-    }
-
-    func testNonHttpURLsAreSentAsPlainText() throws {
-        let sender = ClipboardSenderService(sharingProvider: FakeClipboardSharingProvider())
-
-        let result = try sender.sendTextViaAirDrop("ftp://example.com/file")
-
-        XCTAssertEqual(result.kind, .text)
-        XCTAssertEqual(try String(contentsOf: result.fileURL, encoding: .utf8), "ftp://example.com/file")
-    }
-
-    func testSenderRemovesPreviousTemporaryFilesOnStartup() throws {
-        let temporaryDirectory = FileManager.default.temporaryDirectory.appendingPathComponent(
-            "ClipboardDrop",
-            isDirectory: true
-        )
-        try FileManager.default.createDirectory(at: temporaryDirectory, withIntermediateDirectories: true)
-        let staleFileURL = temporaryDirectory.appendingPathComponent("stale.txt")
-        try "old clipboard".write(to: staleFileURL, atomically: true, encoding: .utf8)
-
-        _ = ClipboardSenderService(sharingProvider: FakeClipboardSharingProvider())
-
-        XCTAssertFalse(FileManager.default.fileExists(atPath: staleFileURL.path))
-    }
-
-    func testControllerKeepsHistoryItemTypeAfterCopy() {
-        let controller = ClipDropController(
-            sender: ClipboardSenderService(sharingProvider: FakeClipboardSharingProvider()),
-            historyStore: ClipboardHistoryStore(pasteboard: NSPasteboard(name: NSPasteboard.Name(UUID().uuidString)))
-        )
-        let item = ClipboardHistoryItem(id: UUID(), text: "hello", contentType: .link, createdAt: Date())
-        controller.copyHistoryItem(item)
-
-        XCTAssertEqual(controller.statusSummary, "Copied")
-        XCTAssertEqual(controller.historyItems.map(\.text), ["hello"])
-        XCTAssertEqual(controller.historyItems.map(\.contentType), [.link])
-        XCTAssertEqual(controller.currentClipboardItem?.contentType, .link)
-        XCTAssertTrue(controller.hasSendableCurrentClipboard)
-    }
-
-    func testControllerClearsHistoryAndCurrentClipboardPresentation() {
-        let pasteboard = NSPasteboard(name: NSPasteboard.Name(UUID().uuidString))
-        pasteboard.clearContents()
-        pasteboard.setString("private note", forType: .string)
-        let store = ClipboardHistoryStore(pasteboard: pasteboard)
-        let controller = ClipDropController(
-            sender: ClipboardSenderService(pasteboard: pasteboard, sharingProvider: FakeClipboardSharingProvider()),
-            historyStore: store
-        )
-
-        controller.refreshClipboardHistory()
-        XCTAssertTrue(controller.hasSendableCurrentClipboard)
-
-        controller.clearClipboardHistory()
-
-        XCTAssertTrue(controller.historyItems.isEmpty)
-        XCTAssertNil(controller.currentClipboardItem)
-        XCTAssertFalse(controller.hasSendableCurrentClipboard)
-        XCTAssertEqual(controller.statusSummary, "History cleared")
-    }
-
-    func testCurrentClipboardSendReportsAirDropOpened() throws {
-        let pasteboard = NSPasteboard(name: NSPasteboard.Name(UUID().uuidString))
-        pasteboard.clearContents()
-        pasteboard.setString("send this exact text", forType: .string)
-        let sharingProvider = FakeClipboardSharingProvider()
-        let store = ClipboardHistoryStore(pasteboard: pasteboard)
-        let controller = ClipDropController(
-            sender: ClipboardSenderService(pasteboard: pasteboard, sharingProvider: sharingProvider),
-            historyStore: store
-        )
-
-        controller.refreshClipboardHistory()
-        controller.sendClipboardViaAirDrop()
-
-        XCTAssertEqual(controller.statusSummary, "AirDrop opened")
-        XCTAssertEqual(sharingProvider.performedURLs.count, 1)
-        XCTAssertEqual(
-            try String(contentsOf: XCTUnwrap(sharingProvider.performedURLs.first), encoding: .utf8),
-            "send this exact text"
-        )
-    }
-
-    func testEmptyClipboardDoesNotOpenPaywall() {
-        let pasteboard = NSPasteboard(name: NSPasteboard.Name(UUID().uuidString))
-        pasteboard.clearContents()
+    func testRouterSendsCurrentClipboardURLThroughUnifiedInterface() async {
+        let defaults = makeDefaults()
+        let provider = FakeClipboardSharingProvider()
+        let pasteboard = namedPasteboard()
+        pasteboard.setString("  https://example.com/path  ", forType: .string)
+        let history = ClipboardHistoryStore(pasteboard: pasteboard)
+        let reviewRequests = makeReviewCoordinator(defaults: defaults)
         let composition = ClipDropAppComposition(
-            defaults: makeCommerceDefaults(),
-            commerceClient: KikiInMemoryCommerceClient(),
-            sender: ClipboardSenderService(
-                pasteboard: pasteboard,
-                sharingProvider: FakeClipboardSharingProvider()
-            ),
-            historyStore: ClipboardHistoryStore(pasteboard: pasteboard)
-        )
-
-        composition.router.sendClipboardViaAirDrop()
-
-        XCTAssertFalse(composition.settingsRoute.isPaywallSheetPresented)
-        XCTAssertEqual(composition.controller.statusSummary, "Nothing to send")
-    }
-
-    func testUnresolvedAccessRefreshesBeforeShowingPaywall() async {
-        let client = KikiInMemoryCommerceClient()
-        let sharingProvider = FakeClipboardSharingProvider()
-        let composition = ClipDropAppComposition(
-            defaults: makeCommerceDefaults(),
-            commerceClient: client,
-            sender: ClipboardSenderService(sharingProvider: sharingProvider),
-            presentAccessVerificationError: {}
-        )
-        let item = ClipboardHistoryItem(
-            id: UUID(),
-            text: "send after access check",
-            contentType: .text,
-            createdAt: Date()
-        )
-
-        composition.router.sendHistoryItemViaAirDrop(item)
-        XCTAssertFalse(composition.settingsRoute.isPaywallSheetPresented)
-
-        await Task.yield()
-        await composition.router.refreshAccess()
-
-        XCTAssertEqual(client.refreshCallCount, 1)
-        XCTAssertTrue(composition.settingsRoute.isPaywallSheetPresented)
-        XCTAssertTrue(sharingProvider.performedURLs.isEmpty)
-    }
-
-    func testDegradedAccessDoesNotClassifyUserAsUnpaid() async {
-        let client = KikiInMemoryCommerceClient()
-        client.refreshResult = .failure(.network)
-        let sharingProvider = FakeClipboardSharingProvider()
-        var verificationErrorCount = 0
-        let composition = ClipDropAppComposition(
-            defaults: makeCommerceDefaults(),
-            commerceClient: client,
-            sender: ClipboardSenderService(sharingProvider: sharingProvider),
-            presentAccessVerificationError: { verificationErrorCount += 1 }
-        )
-        let item = ClipboardHistoryItem(
-            id: UUID(),
-            text: "do not misclassify",
-            contentType: .text,
-            createdAt: Date()
-        )
-
-        composition.router.sendHistoryItemViaAirDrop(item)
-        await Task.yield()
-        await composition.router.refreshAccess()
-
-        guard case .degraded = composition.accessManager.readiness else {
-            return XCTFail("Expected a failed refresh to leave access readiness degraded")
-        }
-        XCTAssertFalse(composition.settingsRoute.isPaywallSheetPresented)
-        XCTAssertTrue(sharingProvider.performedURLs.isEmpty)
-        XCTAssertEqual(verificationErrorCount, 1)
-    }
-
-    func testCachedProCanSendBeforeInitialRefreshFinishes() {
-        let purchaseDate = Date(timeIntervalSince1970: 30_000)
-        let entitlement = CommerceEntitlement(
-            plan: ClipDropPurchasePlan.lifetime.commercePlan,
-            productIdentifier: ClipDropRevenueCatConfiguration.lifetimeProductIdentifier,
-            entitlementIdentifier: ClipDropRevenueCatConfiguration.entitlementIdentifier,
-            expirationDate: nil,
-            originalPurchaseDate: purchaseDate
-        )
-        let client = KikiInMemoryCommerceClient(entitlement: entitlement)
-        let sharingProvider = FakeClipboardSharingProvider()
-        let composition = ClipDropAppComposition(
-            defaults: makeCommerceDefaults(),
-            commerceClient: client,
-            sender: ClipboardSenderService(sharingProvider: sharingProvider)
-        )
-        let item = ClipboardHistoryItem(
-            id: UUID(),
-            text: "cached pro send",
-            contentType: .text,
-            createdAt: purchaseDate
-        )
-
-        composition.router.sendHistoryItemViaAirDrop(item)
-
-        XCTAssertEqual(client.refreshCallCount, 0)
-        XCTAssertFalse(composition.settingsRoute.isPaywallSheetPresented)
-        XCTAssertEqual(sharingProvider.performedURLs.count, 1)
-    }
-
-    func testQueuedCurrentClipboardSendUsesTheItemChosenBeforeRefresh() async throws {
-        let purchaseDate = Date(timeIntervalSince1970: 40_000)
-        let entitlement = CommerceEntitlement(
-            plan: ClipDropPurchasePlan.lifetime.commercePlan,
-            productIdentifier: ClipDropRevenueCatConfiguration.lifetimeProductIdentifier,
-            entitlementIdentifier: ClipDropRevenueCatConfiguration.entitlementIdentifier,
-            expirationDate: nil,
-            originalPurchaseDate: purchaseDate
-        )
-        let client = KikiInMemoryCommerceClient()
-        client.refreshResult = .success(entitlement)
-        let pasteboard = NSPasteboard(name: NSPasteboard.Name(UUID().uuidString))
-        pasteboard.clearContents()
-        pasteboard.setString("chosen before refresh", forType: .string)
-        let sharingProvider = FakeClipboardSharingProvider()
-        let composition = ClipDropAppComposition(
-            defaults: makeCommerceDefaults(),
-            commerceClient: client,
-            sender: ClipboardSenderService(pasteboard: pasteboard, sharingProvider: sharingProvider),
-            historyStore: ClipboardHistoryStore(pasteboard: pasteboard)
-        )
-
-        composition.router.sendClipboardViaAirDrop()
-        pasteboard.clearContents()
-        pasteboard.setString("copied while refreshing", forType: .string)
-        await Task.yield()
-        await composition.router.refreshAccess()
-
-        let sentURL = try XCTUnwrap(sharingProvider.performedURLs.first)
-        XCTAssertEqual(
-            try String(contentsOf: sentURL, encoding: .utf8),
-            "chosen before refresh"
-        )
-    }
-
-    func testClearHistoryCancelsQueuedSend() async {
-        let purchaseDate = Date(timeIntervalSince1970: 50_000)
-        let entitlement = CommerceEntitlement(
-            plan: ClipDropPurchasePlan.lifetime.commercePlan,
-            productIdentifier: ClipDropRevenueCatConfiguration.lifetimeProductIdentifier,
-            entitlementIdentifier: ClipDropRevenueCatConfiguration.entitlementIdentifier,
-            expirationDate: nil,
-            originalPurchaseDate: purchaseDate
-        )
-        let client = KikiInMemoryCommerceClient()
-        client.refreshResult = .success(entitlement)
-        let sharingProvider = FakeClipboardSharingProvider()
-        let composition = ClipDropAppComposition(
-            defaults: makeCommerceDefaults(),
-            commerceClient: client,
-            sender: ClipboardSenderService(sharingProvider: sharingProvider)
-        )
-        let item = ClipboardHistoryItem(
-            id: UUID(),
-            text: "cancel this send",
-            contentType: .text,
-            createdAt: purchaseDate
-        )
-
-        composition.router.sendHistoryItemViaAirDrop(item)
-        composition.router.clearClipboardHistory()
-        await Task.yield()
-        await composition.router.refreshAccess()
-
-        XCTAssertTrue(sharingProvider.performedURLs.isEmpty)
-    }
-
-    func testDefaultHistoryLimitMatchesAppConfig() {
-        XCTAssertEqual(ClipDropAppConfig.default.maxRecentItems, 10)
-
-        let store = ClipboardHistoryStore(
-            pasteboard: NSPasteboard(name: NSPasteboard.Name(UUID().uuidString))
-        )
-        for index in 0..<12 {
-            store.record("item \(index)")
-        }
-
-        XCTAssertEqual(store.items.count, 10)
-        XCTAssertEqual(store.items.first?.text, "item 11")
-        XCTAssertEqual(store.items.last?.text, "item 2")
-    }
-
-    func testVersionSummaryUsesStableFormat() {
-        XCTAssertEqual(
-            ClipDropController.versionSummary(version: "1.2.3", build: "45"),
-            "Version 1.2.3 (45)"
-        )
-    }
-
-    func testPurchasePlansKeepLifetimePricingAndProductIdentifiersStable() {
-        XCTAssertEqual(ClipDropPurchasePlan.allCases.map(\.id), ["lifetime", "supporterLifetime"])
-        XCTAssertEqual(ClipDropPurchasePlan.lifetime.fallbackDisplayPrice, "$6.99")
-        XCTAssertEqual(ClipDropPurchasePlan.supporterLifetime.fallbackDisplayPrice, "$10.99")
-        XCTAssertEqual(ClipDropPurchasePlan.supporterLifetime.title, "Lifetime + Support")
-        XCTAssertEqual(
-            ClipDropPurchasePlan.supporterLifetime.subtitle,
-            "Same Pro features, with extra support for development"
-        )
-        XCTAssertEqual(
-            ClipDropPurchasePlan.allCases.map { $0.commercePlan.rawValue },
-            ["lifetime", "supporterLifetime"]
-        )
-        XCTAssertEqual(ClipDropRevenueCatConfiguration.entitlementIdentifier, "pro")
-        XCTAssertEqual(ClipDropRevenueCatConfiguration.offeringIdentifier, "default")
-        XCTAssertEqual(
-            ClipDropRevenueCatConfiguration.commerceConfiguration.productIdentifiers,
-            [
-                CommercePlan("lifetime"): "dev.kkuk.clipboarddrop.pro.lifetime",
-                CommercePlan("supporterLifetime"): "dev.kkuk.clipboarddrop.pro.supporter"
-            ]
-        )
-    }
-
-    func testExplicitTrialStartsOnlyWhenUserChoosesItAndExpiresAfterTwoDays() async {
-        let start = Date(timeIntervalSince1970: 10_000)
-        let defaults = makeCommerceDefaults()
-        let client = KikiInMemoryCommerceClient()
-        let manager = KikiAccessManager(
-            configuration: ClipDropRevenueCatConfiguration.accessConfiguration,
             defaults: defaults,
-            commerceClient: client,
-            now: { start }
+            sender: makeSender(provider: provider),
+            historyStore: history,
+            reviewRequests: reviewRequests
         )
 
-        XCTAssertEqual(manager.status, .notStarted)
-
-        await manager.startTrial()
-
-        guard case .trial(.time(let daysRemaining, let expiresAt)) = manager.status else {
-            return XCTFail("Expected the explicit trial to become active")
-        }
-        XCTAssertEqual(daysRemaining, 2)
-        XCTAssertEqual(expiresAt, start.addingTimeInterval(ClipDropRevenueCatConfiguration.trialDuration))
-
-        let expiredManager = KikiAccessManager(
-            configuration: ClipDropRevenueCatConfiguration.accessConfiguration,
-            defaults: defaults,
-            commerceClient: client,
-            now: { start.addingTimeInterval(ClipDropRevenueCatConfiguration.trialDuration + 1) }
-        )
-        XCTAssertEqual(expiredManager.status, .expired)
+        let outcome = await composition.router.sendCurrentClipboard(source: .popover)
+        guard case .success(let receipt) = outcome else { return XCTFail("Expected a confirmed share") }
+        XCTAssertEqual(receipt.kind, .url)
+        XCTAssertEqual(provider.capturedContents, ["https://example.com/path"])
+        XCTAssertEqual(reviewRequests.successfulSendCount, 1)
     }
 
-    func testEitherLifetimePurchaseUnlocksTheSameProEntitlement() async throws {
-        for plan in ClipDropPurchasePlan.allCases {
-            let purchaseDate = Date(timeIntervalSince1970: 20_000)
-            let entitlement = CommerceEntitlement(
-                plan: plan.commercePlan,
-                productIdentifier: plan == .lifetime
-                    ? ClipDropRevenueCatConfiguration.lifetimeProductIdentifier
-                    : ClipDropRevenueCatConfiguration.supporterProductIdentifier,
-                entitlementIdentifier: ClipDropRevenueCatConfiguration.entitlementIdentifier,
-                expirationDate: nil,
-                originalPurchaseDate: purchaseDate
-            )
-            let client = KikiInMemoryCommerceClient()
-            client.purchaseResults[plan.commercePlan] = .success(entitlement)
-            let manager = KikiAccessManager(
-                configuration: ClipDropRevenueCatConfiguration.accessConfiguration,
-                defaults: makeCommerceDefaults(),
-                commerceClient: client,
-                now: { purchaseDate }
-            )
-
-            try await manager.purchase(planID: plan.id)
-
-            guard case .pro(let unlockedPlan, let snapshot) = manager.status else {
-                return XCTFail("Expected \(plan.id) to unlock Pro")
-            }
-            XCTAssertEqual(unlockedPlan.id, plan.id)
-            XCTAssertEqual(snapshot.entitlementIdentifier, "pro")
-            XCTAssertEqual(snapshot.originalPurchaseDate, purchaseDate)
-        }
-    }
-
-    func testMissingOfferingKeepsBothFallbackPlansAvailable() async {
-        let manager = KikiAccessManager(
-            configuration: ClipDropRevenueCatConfiguration.accessConfiguration,
-            defaults: makeCommerceDefaults(),
-            commerceClient: KikiInMemoryCommerceClient()
-        )
-
-        await manager.loadOfferings()
-
-        XCTAssertEqual(manager.availablePlans.map(\.id), ["lifetime", "supporterLifetime"])
-        XCTAssertEqual(manager.availablePlans.map(\.displayPrice), ["$6.99", "$10.99"])
-        XCTAssertFalse(manager.availablePlans.contains(where: \.isAvailable))
-    }
-
-    func testOnboardingUsesTwoStepGuidedFlowBeforePaywall() {
+    func testReviewCountsOnlySuccessfulSendsAndRequestsAtNaturalMoment() async {
+        let defaults = makeDefaults()
+        var systemRequestCount = 0
+        let reviewRequests = makeReviewCoordinator(defaults: defaults) { systemRequestCount += 1 }
+        let provider = FakeClipboardSharingProvider()
         let composition = ClipDropAppComposition(
-            defaults: makeCommerceDefaults(),
-            commerceClient: KikiInMemoryCommerceClient()
+            defaults: defaults,
+            sender: makeSender(provider: provider),
+            reviewRequests: reviewRequests
         )
 
-        XCTAssertEqual(ClipDropOnboardingPhase.allCases, [.welcome, .workflow])
-        XCTAssertEqual(composition.onboardingCoordinator.configuration.steps.count, 1)
-        XCTAssertEqual(
-            composition.onboardingCoordinator.configuration.completionKey,
-            "ClipDrop.Onboarding.hasCompleted"
-        )
-        XCTAssertTrue(composition.onboardingCoordinator.canSkip)
+        for _ in 0..<3 {
+            let outcome = await composition.router.send(.text("sent"), source: .services)
+            guard case .success = outcome else { return XCTFail("Expected a confirmed share") }
+        }
+        XCTAssertEqual(reviewRequests.successfulSendCount, 3)
+        XCTAssertEqual(systemRequestCount, 0)
+        XCTAssertTrue(reviewRequests.requestIfEligibleAtNaturalMoment())
+        XCTAssertEqual(systemRequestCount, 1)
+        XCTAssertFalse(reviewRequests.requestIfEligibleAtNaturalMoment())
     }
 
-    func testOnboardingSessionIntroducesWorkflowThenPresentsPaywall() {
+    func testFailedOrCancelledSendDoesNotQualifyForReview() async {
+        let defaults = makeDefaults()
+        var systemRequestCount = 0
+        let reviewRequests = makeReviewCoordinator(defaults: defaults) { systemRequestCount += 1 }
+        let provider = FakeClipboardSharingProvider(result: .cancelled)
+        let composition = ClipDropAppComposition(
+            defaults: defaults,
+            sender: makeSender(provider: provider),
+            reviewRequests: reviewRequests
+        )
+
+        let outcome = await composition.router.send(.text("cancelled"), source: .popover)
+        XCTAssertEqual(outcome, .cancelled)
+        XCTAssertEqual(reviewRequests.successfulSendCount, 0)
+        XCTAssertFalse(reviewRequests.requestIfEligibleAtNaturalMoment())
+        XCTAssertEqual(systemRequestCount, 0)
+    }
+
+    func testOnboardingSessionHasTwoStepsAndCompletesOnFinalAction() {
         var finishCount = 0
         let session = ClipDropOnboardingSession { finishCount += 1 }
-
-        XCTAssertEqual(session.phase, .welcome)
-        XCTAssertFalse(session.isPaywallPresented)
+        XCTAssertEqual(session.phase, .howToSend)
 
         session.advance()
-        XCTAssertEqual(session.phase, .workflow)
-
+        XCTAssertEqual(session.phase, .receiverTips)
         session.back()
-        XCTAssertEqual(session.phase, .welcome)
-
+        XCTAssertEqual(session.phase, .howToSend)
         session.advance()
         session.advance()
-        XCTAssertTrue(session.isPaywallPresented)
 
-        session.complete()
+        XCTAssertEqual(finishCount, 1)
         session.complete()
         XCTAssertEqual(finishCount, 1)
     }
 
-    func testAutomaticOnboardingWaitsForAuthoritativeAccess() async {
-        let client = KikiInMemoryCommerceClient()
-        let composition = ClipDropAppComposition(
-            defaults: makeCommerceDefaults(),
-            commerceClient: client
-        )
-
-        XCTAssertFalse(composition.router.showAutomaticOnboardingIfAllowed())
-
-        await composition.accessManager.refresh()
-
-        XCTAssertTrue(composition.router.showAutomaticOnboardingIfAllowed())
-        composition.onboardingCoordinator.close()
-    }
-
-    func testAutomaticOnboardingDoesNotShowWhenAccessRefreshIsDegraded() async {
-        let client = KikiInMemoryCommerceClient()
-        client.refreshResult = .failure(.network)
-        let composition = ClipDropAppComposition(
-            defaults: makeCommerceDefaults(),
-            commerceClient: client
-        )
-
-        await composition.accessManager.refresh()
-
-        guard case .degraded = composition.accessManager.readiness else {
-            return XCTFail("Expected degraded access readiness")
+    func testDefaultHistoryLimitMatchesAppConfig() {
+        XCTAssertEqual(ClipDropAppConfig.default.maxRecentItems, 10)
+        let store = historyStore()
+        for index in 0..<12 {
+            store.record("item-\(index)")
         }
-        XCTAssertFalse(composition.router.showAutomaticOnboardingIfAllowed())
-        XCTAssertFalse(composition.onboardingCoordinator.isVisible)
+        XCTAssertEqual(store.items.count, 10)
     }
 
-    func testAutomaticOnboardingSkipsExistingProUsers() async {
-        let entitlement = CommerceEntitlement(
-            plan: ClipDropPurchasePlan.lifetime.commercePlan,
-            productIdentifier: ClipDropRevenueCatConfiguration.lifetimeProductIdentifier,
-            entitlementIdentifier: ClipDropRevenueCatConfiguration.entitlementIdentifier,
-            expirationDate: nil,
-            originalPurchaseDate: Date(timeIntervalSince1970: 60_000)
-        )
-        let composition = ClipDropAppComposition(
-            defaults: makeCommerceDefaults(),
-            commerceClient: KikiInMemoryCommerceClient(entitlement: entitlement)
-        )
-
-        await composition.accessManager.refresh()
-
-        XCTAssertFalse(composition.router.showAutomaticOnboardingIfAllowed())
-        XCTAssertFalse(composition.onboardingCoordinator.isVisible)
+    func testVersionSummaryUsesStableFormat() {
+        XCTAssertEqual(ClipDropController.versionSummary(version: "1.2.0", build: "4"), "Version 1.2.0 (4)")
     }
 
-#if DEBUG
-    func testDebugOnboardingTriggerResetsCompletionAndPresentsFlow() {
-        let defaults = makeCommerceDefaults()
-        defaults.set(true, forKey: "ClipDrop.Onboarding.hasCompleted")
-        let composition = ClipDropAppComposition(
+    private func makeSender(
+        provider: FakeClipboardSharingProvider,
+        directory: URL? = nil,
+        preferences: ClipDropSendPreferences = .init()
+    ) -> ClipboardSenderService {
+        ClipboardSenderService(
+            sharingProvider: provider,
+            temporaryDirectory: directory ?? temporaryDirectory(),
+            preferences: { preferences }
+        )
+    }
+
+    private func makeReviewCoordinator(
+        defaults: UserDefaults,
+        request: @escaping () -> Void = {}
+    ) -> ClipDropReviewRequestCoordinator {
+        ClipDropReviewRequestCoordinator(
             defaults: defaults,
-            commerceClient: KikiInMemoryCommerceClient()
+            appVersion: "4",
+            now: { Date(timeIntervalSince1970: 1_800_000_000) },
+            requestSystemReview: request
         )
-
-        XCTAssertTrue(composition.onboardingCoordinator.isCompleted)
-
-        composition.router.triggerOnboarding()
-
-        XCTAssertFalse(composition.onboardingCoordinator.isCompleted)
-        XCTAssertTrue(composition.onboardingCoordinator.isVisible)
-        composition.onboardingCoordinator.close()
     }
 
-    func testDebugPaidAccessOverrideUsesProductAccessManager() {
-        let composition = ClipDropAppComposition(
-            defaults: makeCommerceDefaults(),
-            commerceClient: KikiInMemoryCommerceClient()
-        )
-
-        composition.accessManager.setDebugProAccessOverride(.trial)
-        XCTAssertEqual(composition.accessManager.debugProAccessOverride, .trial)
-        XCTAssertTrue(composition.accessManager.status.isActive)
-
-        composition.accessManager.setDebugProAccessOverride(.pro)
-        XCTAssertEqual(composition.accessManager.debugProAccessOverride, .pro)
-        XCTAssertTrue(composition.accessManager.status.isPro)
-
-        composition.accessManager.clearDebugProAccessOverride()
-        XCTAssertNil(composition.accessManager.debugProAccessOverride)
-        XCTAssertEqual(composition.accessManager.status, .notStarted)
-    }
-#endif
-
-    private func makeCommerceDefaults() -> UserDefaults {
-        let suiteName = "ClipDropTests.Commerce.\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: suiteName)!
-        defaults.removePersistentDomain(forName: suiteName)
+    private func makeDefaults() -> UserDefaults {
+        let name = "ClipDropTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: name)!
+        defaults.removePersistentDomain(forName: name)
         return defaults
     }
 
+    private func historyItem(
+        _ text: String,
+        contentType: ClipboardContentType = .text
+    ) -> ClipboardHistoryItem {
+        ClipboardHistoryItem(id: UUID(), text: text, contentType: contentType, createdAt: Date())
+    }
+
+    private func historyStore(maxItemCount: Int = ClipDropAppConfig.default.maxRecentItems) -> ClipboardHistoryStore {
+        ClipboardHistoryStore(pasteboard: namedPasteboard(), maxItemCount: maxItemCount)
+    }
+
+    private func namedPasteboard() -> NSPasteboard {
+        let pasteboard = NSPasteboard(name: NSPasteboard.Name(UUID().uuidString))
+        pasteboard.clearContents()
+        return pasteboard
+    }
+
+    private func temporaryDirectory() -> URL {
+        FileManager.default.temporaryDirectory
+            .appendingPathComponent("ClipDropTests-\(UUID().uuidString)", isDirectory: true)
+    }
 }
 
 @MainActor
 private final class FakeClipboardSharingProvider: ClipboardSharingProviding {
+    private let result: ClipboardSharingResult
+    private let completesImmediately: Bool
     private(set) var performedURLs: [URL] = []
-    var shouldSucceed = true
+    private(set) var capturedContents: [String] = []
+    private(set) var pendingCompletion: (@MainActor (ClipboardSharingResult) -> Void)?
 
-    func performAirDrop(with fileURL: URL) -> Bool {
+    init(result: ClipboardSharingResult = .shared, completesImmediately: Bool = true) {
+        self.result = result
+        self.completesImmediately = completesImmediately
+    }
+
+    func performAirDrop(
+        with fileURL: URL,
+        completion: @escaping @MainActor (ClipboardSharingResult) -> Void
+    ) {
         performedURLs.append(fileURL)
-        return shouldSucceed
+        capturedContents.append((try? String(contentsOf: fileURL, encoding: .utf8)) ?? "")
+        if completesImmediately {
+            completion(result)
+        } else {
+            pendingCompletion = completion
+        }
+    }
+
+    func complete(_ result: ClipboardSharingResult) {
+        let completion = pendingCompletion
+        pendingCompletion = nil
+        completion?(result)
     }
 }

@@ -7,7 +7,7 @@
 
 1. **系统优先**：贴合 macOS HIG。默认走系统外观、系统灰阶、系统控件反馈，
    不自造视觉。
-2. **品牌紫收敛**：品牌紫仅用于「App 标识」（头部小徽标）和「Pro 相关 CTA」。
+2. **品牌紫收敛**：品牌紫仅用于「App 标识」（头部小徽标）。
    剪贴板列表内的一切（内容类型图标、发送/复制按钮、hover）**全部使用系统灰阶**。
 3. **动作优先级明确**：App 名为 Clipboard *Drop*，英雄动作是「AirDrop 发送」。
    行的主操作 = 发送；复制为次操作。
@@ -39,7 +39,7 @@
 ## 颜色 token（`Colors`）
 
 - `brand`：品牌紫，**深浅色自适应**。浅色 `#7852F2`，深色提亮至 `#9E82FA`，
-  保证深色底上对比度。仅用于头部徽标与 Pro CTA。
+  保证深色底上对比度。用于头部徽标。
 - `rowHover`：`Color.primary.opacity(0.06)`，系统灰阶，行 hover / 键盘选中反馈。
 - 行内容图标、发送/复制按钮：`.secondary`（系统灰阶），禁用态 `.tertiary`。
 
@@ -89,8 +89,7 @@
 - 居中：`doc.on.clipboard`（tertiary）+ 主文 + 引导语。
 
 ### Footer（常驻）
-- 左：Pro CTA（品牌紫 `sparkles`），仅非 Pro 时出现。
-- 右：**Settings 按钮（`gearshape` + 文字）常驻**——设置是高频入口，
+- **Settings 按钮（`gearshape` + 文字）常驻**——设置是高频入口，
   必须一击可达，不能只藏在溢出菜单里（v1 只放溢出菜单，实测难点，回调）。
 
 ## 文案（Copy）
@@ -104,7 +103,6 @@
 | 行 tooltip / a11y | `Send via AirDrop` |
 | 复制按钮 | `Copy` |
 | 溢出菜单 | `Clear History…` / `Settings…` / `Quit Clipboard Drop` |
-| Pro CTA | `Try Pro` / `Trial · Nd left` / `Unlock Pro` |
 
 ## 键盘映射（app 内可达范围，macOS 13）
 - ↑ / ↓：在列表内移动 App 自管的中性选中态。

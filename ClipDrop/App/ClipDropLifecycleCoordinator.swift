@@ -1,12 +1,11 @@
 import AppKit
-import KikiCommerceCore
 import KikiMenuBar
 
 @MainActor
 final class ClipDropLifecycleCoordinator {
     private let definition: ClipDropAppDefinition
     private let controller: ClipDropController
-    private let accessManager: KikiAccessManager
+    private let reviewRequests: ClipDropReviewRequestCoordinator
     private let router: ClipDropAppRouter
     private var menuBarController: KikiMenuBarPopoverController<ClipDropMenuPopoverView>?
     private var didStart = false
@@ -14,12 +13,12 @@ final class ClipDropLifecycleCoordinator {
     init(
         definition: ClipDropAppDefinition,
         controller: ClipDropController,
-        accessManager: KikiAccessManager,
+        reviewRequests: ClipDropReviewRequestCoordinator,
         router: ClipDropAppRouter
     ) {
         self.definition = definition
         self.controller = controller
-        self.accessManager = accessManager
+        self.reviewRequests = reviewRequests
         self.router = router
     }
 
@@ -43,29 +42,29 @@ final class ClipDropLifecycleCoordinator {
             ),
             onWillShow: { [weak self] in
                 self?.controller.refreshClipboardHistory()
+                self?.reviewRequests.requestIfEligibleAtNaturalMoment()
             }
         ) {
             ClipDropMenuPopoverView(
                 config: self.definition.config,
                 controller: self.controller,
-                accessManager: self.accessManager,
                 actions: ClipDropPopoverActions(
-                    sendClipboard: { [weak self] in self?.router.sendClipboardViaAirDrop() },
-                    sendHistoryItem: { [weak self] item in self?.router.sendHistoryItemViaAirDrop(item) },
+                    sendClipboard: { [weak self] in
+                        guard let self else { return }
+                        Task { await self.router.sendCurrentClipboard(source: .popover) }
+                    },
+                    sendHistoryItem: { [weak self] item in
+                        guard let self else { return }
+                        Task { await self.router.sendHistoryItem(item) }
+                    },
                     copyHistoryItem: { [weak self] item in self?.router.copyHistoryItem(item) },
                     clearHistory: { [weak self] in self?.router.clearClipboardHistory() },
                     openSettings: { [weak self] in self?.router.openSettings() },
-                    openPaywall: { [weak self] in self?.router.openPaywall() },
                     quit: { [weak self] in self?.router.quit() }
                 )
             )
         }
-
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            await self.router.refreshAccess()
-            self.router.showAutomaticOnboardingIfAllowed()
-        }
+        router.showAutomaticOnboardingIfNeeded()
     }
 
     func stop() {
@@ -74,6 +73,7 @@ final class ClipDropLifecycleCoordinator {
         }
         didStart = false
         controller.stopClipboardMonitoring()
+        controller.cleanupTemporarySendFiles()
         menuBarController = nil
     }
 }

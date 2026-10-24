@@ -59,47 +59,36 @@ final class ClipDropController: ObservableObject {
         detailSummary = ClipboardSenderError.emptyClipboard.localizedDescription
     }
 
-    func sendClipboardViaAirDrop() {
-        guard !isSending else {
-            return
-        }
-
-        guard let currentClipboardItem else {
-            reportMissingClipboard()
-            return
-        }
-
-        isSending = true
-        defer { isSending = false }
-
-        do {
-            let result = try sender.sendTextViaAirDrop(currentClipboardItem.text)
-            statusSummary = result.status
-            detailSummary = result.detail
-        } catch {
-            statusSummary = "Nothing sent"
-            detailSummary = error.localizedDescription
-            NSApp.presentError(error)
-        }
+    func cleanupTemporarySendFiles() {
+        sender.cleanupTemporaryFiles()
     }
 
-    func sendHistoryItemViaAirDrop(_ item: ClipboardHistoryItem) {
+    func send(_ payload: ClipDropPayload) async -> ClipboardSendOutcome {
         guard !isSending else {
-            return
+            return .failure(.sendAlreadyInProgress)
         }
 
         isSending = true
         defer { isSending = false }
 
-        do {
-            let result = try sender.sendTextViaAirDrop(item.text)
-            statusSummary = result.status
-            detailSummary = result.detail
-        } catch {
+        let outcome = await sender.send(payload)
+        switch outcome {
+        case .success:
+            statusSummary = "Sent"
+            detailSummary = "AirDrop confirmed the send."
+        case .cancelled:
+            statusSummary = "Send canceled"
+            detailSummary = "No item was sent."
+        case .failure(let error):
+            if error == .emptyClipboard {
+                reportMissingClipboard()
+                return outcome
+            }
             statusSummary = "Nothing sent"
             detailSummary = error.localizedDescription
             NSApp.presentError(error)
         }
+        return outcome
     }
 
     func copyHistoryItem(_ item: ClipboardHistoryItem) {

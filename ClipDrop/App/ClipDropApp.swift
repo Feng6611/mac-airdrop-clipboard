@@ -10,10 +10,7 @@ struct ClipDropApp: App {
             let composition = appDelegate.composition
             ClipDropSettingsView(
                 config: composition.definition.config,
-                settingsCoordinator: composition.settingsCoordinator,
-                accessManager: composition.accessManager,
-                route: composition.settingsRoute,
-                onTriggerOnboarding: composition.router.triggerOnboarding
+                settingsCoordinator: composition.settingsCoordinator
             )
         }
     }

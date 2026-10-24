@@ -1,31 +1,41 @@
 # Clipboard Drop Agent Notes
 
-This is a focused macOS menu bar app built on remote `Kiki_mackit`.
+Clipboard Drop is a focused macOS menu bar app built on the free Base modules
+from `Kiki_mackit` 0.11.0. Read `Docs/Architecture.md` before structural changes.
 
-Read `Docs/Architecture.md` before structural changes. ClipDrop follows the
-Command Reopen-style app-target layout:
+Keep the app organized by responsibility:
 
-- `App/`: app lifecycle, Kiki wiring, controllers, and app state.
-- `Features/`: menu bar, settings, and access UI surfaces.
-- `Platform/`: direct pasteboard, AirDrop, and other macOS service bridges.
-- `Shared/`: app-local config, send preferences, links, and design tokens.
-- `Core/`: optional only; do not add it unless a rule is truly platform-free or
-  has a second consumer.
+- `App/`: app lifecycle, Kiki wiring, controllers, and routing.
+- `Features/`: menu bar, settings, and onboarding UI.
+- `Platform/`: pasteboard and macOS sharing-service bridges.
+- `Shared/`: app-local payloads, send preferences, links, and design tokens.
+- `Core/`: optional; add it only for platform-free logic with a second consumer.
 
-Keep V1 narrow:
+Product boundaries:
 
-- Send text clipboard content as one AirDrop-able UTF-8 `.txt` file.
+- Clipboard Drop 1.2 and later is free. Do not add purchase, trial, entitlement,
+  or donation flows.
+- Send text and HTTP/HTTPS links as temporary AirDrop-able files.
 - Keep recent clipboard items in memory only, capped at the app config limit.
-- Do not add persisted clipboard history, cloud sync, receive-side automation, or Nearby Direct in V1.
-- Keep AirDrop and pasteboard business logic in the app target, not in `Kiki_mackit`.
+- Do not add persisted clipboard history, cloud sync, or receive-side automation.
+- The app does not make network requests. Keep
+  `com.apple.security.network.client` out of its entitlements.
+- Keep AirDrop and pasteboard business logic in the app target, not in Kiki.
 - Keep SwiftUI/Kiki UI out of `Platform/`, and keep AppKit service code out of
   feature views.
 - Settings should stay on `KikiSettingsShell` and Kiki row components. Do not
-  add test-only Settings windows or duplicate panes. Use a Kiki row component
-  when the pinned `Kiki_mackit` dependency exposes one; otherwise keep the
-  local control small and note the future kit migration.
-- Menu, popover, and future UI smoke entry points should call the same
-  app-owned actions, such as `openSettings()` and `sendClipboardViaAirDrop()`.
+  add test-only Settings windows or duplicate panes.
+- All send entry points go through `ClipDropAppRouter.send(_:source:)` or
+  `sendCurrentClipboard(source:)`.
+- Treat `NSSharingService` delegate success as a confirmed send. Return success,
+  failure, or cancellation asynchronously; opening the AirDrop panel is not
+  success.
+- Delete each temporary file after the sharing callback. Clear the app's
+  temporary directory at startup and shutdown.
+- Start onboarding on first launch when it is incomplete. It has two steps and
+  no paywall.
+- Keep the debug `--clipdrop-debug-open-settings` and
+  `--clipdrop-debug-open-onboarding` launch arguments for UI smoke checks.
 
 Recommended verification:
 

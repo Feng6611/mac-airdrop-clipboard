@@ -1,19 +1,17 @@
 import AppKit
-import KikiCommerceCore
 import KikiOnboarding
 import SwiftUI
 
 enum ClipDropOnboardingPhase: Int, CaseIterable, Equatable {
-    case welcome
-    case workflow
+    case howToSend
+    case receiverTips
 
     var progressIndex: Int { rawValue }
 }
 
 @MainActor
 final class ClipDropOnboardingSession: ObservableObject {
-    @Published private(set) var phase: ClipDropOnboardingPhase = .welcome
-    @Published var isPaywallPresented = false
+    @Published private(set) var phase: ClipDropOnboardingPhase = .howToSend
 
     private let onFinish: @MainActor () -> Void
     private var didFinish = false
@@ -24,16 +22,16 @@ final class ClipDropOnboardingSession: ObservableObject {
 
     func advance() {
         switch phase {
-        case .welcome:
-            phase = .workflow
-        case .workflow:
-            isPaywallPresented = true
+        case .howToSend:
+            phase = .receiverTips
+        case .receiverTips:
+            complete()
         }
     }
 
     func back() {
-        guard phase == .workflow else { return }
-        phase = .welcome
+        guard phase == .receiverTips else { return }
+        phase = .howToSend
     }
 
     func complete() {
@@ -49,14 +47,12 @@ enum ClipDropOnboardingFlow {
     @MainActor
     static func makeCoordinator(
         definition: ClipDropAppDefinition,
-        accessManager: KikiAccessManager,
         completionStore: KikiOnboardingCompletionStore
     ) -> KikiOnboardingCoordinator {
         let flow = KikiOnboardingStep.custom(id: "clipdrop-guided-flow") { navigation in
             AnyView(
                 ClipDropOnboardingFlowView(
                     config: definition.config,
-                    accessManager: accessManager,
                     onFinish: navigation.finish
                 )
             )
@@ -67,7 +63,7 @@ enum ClipDropOnboardingFlow {
                 appName: definition.config.appName,
                 steps: [flow],
                 completionKey: definition.onboardingCompletionKey,
-                canSkip: true,
+                canSkip: false,
                 tint: ClipDropDesignToken.Colors.brand,
                 windowAutosaveName: definition.onboardingWindowAutosaveName,
                 windowTitle: "Welcome to Clipboard Drop",
@@ -82,17 +78,14 @@ enum ClipDropOnboardingFlow {
 
 private struct ClipDropOnboardingFlowView: View {
     let config: ClipDropAppConfig
-    @ObservedObject var accessManager: KikiAccessManager
     @StateObject private var session: ClipDropOnboardingSession
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(
         config: ClipDropAppConfig,
-        accessManager: KikiAccessManager,
         onFinish: @escaping @MainActor () -> Void
     ) {
         self.config = config
-        self.accessManager = accessManager
         _session = StateObject(wrappedValue: ClipDropOnboardingSession(onFinish: onFinish))
     }
 
@@ -106,17 +99,6 @@ private struct ClipDropOnboardingFlowView: View {
             .easeInOut(duration: reduceMotion ? 0.16 : 0.28),
             value: session.phase
         )
-        .sheet(
-            isPresented: $session.isPaywallPresented,
-            onDismiss: session.complete
-        ) {
-            ClipDropPaywallSheetView(
-                accessManager: accessManager,
-                context: .onboarding,
-                config: config,
-                onFinish: session.complete
-            )
-        }
     }
 
     private var page: some View {
@@ -124,17 +106,13 @@ private struct ClipDropOnboardingFlowView: View {
             appName: config.appName,
             title: title,
             bodyText: bodyText,
-            appIcon: session.phase == .welcome ? NSApp.applicationIconImage : nil,
+            appIcon: session.phase == .howToSend ? NSApp.applicationIconImage : nil,
             iconSystemName: "paperplane.fill",
             primaryAction: KikiOnboardingAction(
                 title: primaryActionTitle,
                 action: session.advance
             ),
             backAction: backAction,
-            skipAction: KikiOnboardingAction(
-                title: "Skip",
-                action: session.complete
-            ),
             tint: ClipDropDesignToken.Colors.brand,
             size: ClipDropOnboardingFlow.windowSize,
             stepIndex: session.phase.progressIndex,
@@ -150,72 +128,72 @@ private struct ClipDropOnboardingFlowView: View {
 
     private var title: String {
         switch session.phase {
-        case .welcome:
-            return "Send copied text and links with AirDrop"
-        case .workflow:
-            return "Copy. Send. Done."
+        case .howToSend:
+            return "Send with AirDrop"
+        case .receiverTips:
+            return "Help the receiver accept AirDrop"
         }
     }
 
     private var bodyText: String {
         switch session.phase {
-        case .welcome:
-            return "Clipboard Drop turns copied text and links into lightweight files ready to send with AirDrop."
-        case .workflow:
-            return "Your latest clipboard item is always ready from the menu bar—no receiver app, account, or cloud sync required."
+        case .howToSend:
+            return "Copy text or a link, open Clipboard Drop from the menu bar, choose Send, then pick a device. The other person doesn’t need to install this app."
+        case .receiverTips:
+            return "A few AirDrop settings can help the other person receive your file."
         }
     }
 
     private var primaryActionTitle: String {
         switch session.phase {
-        case .welcome:
-            return "See How It Works"
-        case .workflow:
-            return "View Pro Options"
+        case .howToSend:
+            return "Continue"
+        case .receiverTips:
+            return "Done"
         }
     }
 
     private var backAction: KikiOnboardingAction? {
-        guard session.phase == .workflow else { return nil }
+        guard session.phase == .receiverTips else { return nil }
         return KikiOnboardingAction(title: "Back", action: session.back)
     }
 
     private var rows: [KikiOnboardingRow] {
         switch session.phase {
-        case .welcome:
+        case .howToSend:
             return [
                 KikiOnboardingRow(
+                    systemImage: "doc.on.clipboard",
+                    title: "Copy text or a link",
+                    detail: "Copy the content you want to send."
+                ),
+                KikiOnboardingRow(
                     systemImage: "menubar.rectangle",
-                    title: "Always in the menu bar",
-                    detail: "Open your latest copied text or link without switching apps."
+                    title: "Open Clipboard Drop",
+                    detail: "Choose Send from the menu bar app."
                 ),
                 KikiOnboardingRow(
                     systemImage: "airplayaudio",
-                    title: "No receiver app",
-                    detail: "Send to any nearby Mac, iPhone, or iPad that accepts AirDrop."
-                ),
-                KikiOnboardingRow(
-                    systemImage: "hand.raised.fill",
-                    title: "Local by design",
-                    detail: "Recent items stay in memory and disappear when you quit."
+                    title: "Pick a device",
+                    detail: "The other person doesn’t need to install this app."
                 )
             ]
-        case .workflow:
+        case .receiverTips:
             return [
                 KikiOnboardingRow(
-                    systemImage: "1.circle.fill",
-                    title: "Copy text or a link",
-                    detail: "Clipboard Drop notices supported clipboard content automatically."
+                    systemImage: "person.crop.circle.badge.questionmark",
+                    title: "Everyone for 10 Minutes",
+                    detail: "If the other person isn’t in Contacts, they can set AirDrop to Everyone for 10 Minutes."
                 ),
                 KikiOnboardingRow(
-                    systemImage: "2.circle.fill",
-                    title: "Open Clipboard Drop",
-                    detail: "Choose the current item or anything recent from the menu bar."
+                    systemImage: "number.circle",
+                    title: "AirDrop code",
+                    detail: "On macOS and iOS 26.2 or later, they may need to enter the code shown on their screen."
                 ),
                 KikiOnboardingRow(
-                    systemImage: "3.circle.fill",
-                    title: "Send with AirDrop",
-                    detail: "Pick a nearby device in the standard macOS AirDrop picker."
+                    systemImage: "person.2",
+                    title: "No shared Apple ID",
+                    detail: "You don’t need to use the same Apple ID."
                 )
             ]
         }

@@ -5,8 +5,6 @@ build/
 .mas-release/
 *.xcuserstate
 xcuserdata/
-Config/LocalSecrets.xcconfig
-
 # Claude/Codex local overrides
 .claude/settings.local.json
 settings.local.json

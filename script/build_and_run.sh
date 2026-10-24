@@ -6,7 +6,7 @@ PROJECT_PATH="${PROJECT_PATH:-$ROOT_DIR/ClipDrop.xcodeproj}"
 SCHEME="${SCHEME:-ClipDrop}"
 CONFIGURATION="${CONFIGURATION:-Debug}"
 APP_NAME="${APP_NAME:-ClipDrop}"
-DERIVED_DATA_PATH="${DERIVED_DATA_PATH:-$ROOT_DIR/.build/DerivedData}"
+DERIVED_DATA_PATH="${DERIVED_DATA_PATH:-/private/tmp/clipdrop-dd-task-f}"
 APP_PATH="$DERIVED_DATA_PATH/Build/Products/$CONFIGURATION/$APP_NAME.app"
 if pgrep -x "$APP_NAME" >/dev/null 2>&1; then
   pkill -x "$APP_NAME" || true
@@ -32,16 +32,7 @@ build_app() {
     build
 }
 
-if [[ -n "${CLIPDROP_REVENUECAT_API_KEY:-}" ]]; then
-  build_app "CLIPDROP_REVENUECAT_API_KEY=$CLIPDROP_REVENUECAT_API_KEY"
-else
-  build_app
-fi
-
-CONFIGURATION="$CONFIGURATION" \
-TARGET_BUILD_DIR="$DERIVED_DATA_PATH/Build/Products/$CONFIGURATION" \
-INFOPLIST_PATH="$APP_NAME.app/Contents/Info.plist" \
-  "$ROOT_DIR/script/verify_revenuecat_api_key.sh"
+build_app
 
 /usr/bin/codesign --verify --deep --strict --verbose=2 "$APP_PATH"
 SIGNING_DETAILS="$(/usr/bin/codesign -dv --verbose=4 "$APP_PATH" 2>&1)"

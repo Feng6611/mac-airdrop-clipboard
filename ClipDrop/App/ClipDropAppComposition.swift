@@ -1,5 +1,4 @@
 import Foundation
-import KikiCommerceCore
 import KikiOnboarding
 import KikiSettings
 
@@ -7,8 +6,7 @@ import KikiSettings
 final class ClipDropAppComposition {
     let definition: ClipDropAppDefinition
     let controller: ClipDropController
-    let accessManager: KikiAccessManager
-    let settingsRoute: ClipDropSettingsRouteModel
+    let reviewRequests: ClipDropReviewRequestCoordinator
     let settingsCoordinator: KikiSettingsCoordinator<ClipDropSettingsTab>
     let onboardingCoordinator: KikiOnboardingCoordinator
     let router: ClipDropAppRouter
@@ -17,32 +15,15 @@ final class ClipDropAppComposition {
     init(
         definition: ClipDropAppDefinition = .live,
         defaults: UserDefaults = .standard,
-        commerceClient: (any CommerceClient)? = nil,
         sender: ClipboardSenderService? = nil,
         historyStore: ClipboardHistoryStore? = nil,
-        presentAccessVerificationError: (() -> Void)? = nil,
+        reviewRequests: ClipDropReviewRequestCoordinator? = nil,
         now: @escaping () -> Date = Date.init
     ) {
+        let reviewRequests = reviewRequests ?? ClipDropReviewRequestCoordinator(defaults: defaults, now: now)
         self.definition = definition
         self.controller = ClipDropController(sender: sender, historyStore: historyStore)
-
-        if let commerceClient {
-            self.accessManager = KikiAccessManager(
-                configuration: definition.accessConfiguration,
-                defaults: defaults,
-                commerceClient: commerceClient,
-                now: now
-            )
-        } else {
-            self.accessManager = KikiAccessManager(
-                configuration: definition.accessConfiguration,
-                revenueCatConfiguration: definition.revenueCatConfiguration,
-                defaults: defaults,
-                now: now
-            )
-        }
-
-        self.settingsRoute = ClipDropSettingsRouteModel()
+        self.reviewRequests = reviewRequests
         self.settingsCoordinator = KikiSettingsCoordinator(
             tabs: ClipDropSettingsTab.kikiTabs,
             initialTab: .general,
@@ -56,22 +37,19 @@ final class ClipDropAppComposition {
         )
         self.onboardingCoordinator = ClipDropOnboardingFlow.makeCoordinator(
             definition: definition,
-            accessManager: accessManager,
             completionStore: KikiOnboardingUserDefaultsCompletionStore(defaults: defaults)
         )
 
         self.router = ClipDropAppRouter(
             controller: controller,
-            accessManager: accessManager,
-            settingsRoute: settingsRoute,
+            reviewRequests: reviewRequests,
             settingsCoordinator: settingsCoordinator,
-            onboardingCoordinator: onboardingCoordinator,
-            presentAccessVerificationError: presentAccessVerificationError
+            onboardingCoordinator: onboardingCoordinator
         )
         self.lifecycle = ClipDropLifecycleCoordinator(
             definition: definition,
             controller: controller,
-            accessManager: accessManager,
+            reviewRequests: reviewRequests,
             router: router
         )
     }
