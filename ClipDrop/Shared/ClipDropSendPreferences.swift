@@ -16,7 +16,7 @@ enum ClipDropTextFileFormat: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .plainText:
-            return "TXT"
+            return "Plain Text"
         case .markdown:
             return "Markdown"
         }
@@ -42,11 +42,11 @@ enum ClipDropURLSendFormat: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .direct:
-            return "Direct"
+            return "Link"
         case .urlFile:
-            return "URL"
+            return "URL File"
         case .plainText:
-            return "TXT"
+            return "Text File"
         }
     }
 

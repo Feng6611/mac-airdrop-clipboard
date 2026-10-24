@@ -179,3 +179,7 @@ Text uses semantic SwiftUI styles (`headline`, `body`, `subheadline`, and
 `caption`) rather than fixed point sizes. Clipboard content types differ by
 symbol, not by additional accent colors or repeated type labels. The popover
 uses one continuous list rather than separate current/history surfaces.
+
+Debug builds also accept `--clipdrop-debug-snapshot-settings <path>` together with
+`--clipdrop-debug-open-settings` to write the Settings window to a PNG without
+Screen Recording access (use an unsandboxed Debug build so the path is writable).
