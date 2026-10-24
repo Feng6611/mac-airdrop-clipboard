@@ -92,7 +92,7 @@ struct ClipDropAppShortcutsProvider: AppShortcutsProvider {
             intent: SendTextIntent(),
             phrases: ["Send text with \(.applicationName)"],
             shortTitle: "Send Text",
-            systemImageName: "text.page"
+            systemImageName: "doc.text"
         )
         AppShortcut(
             intent: ShowQRCodeIntent(),
