@@ -5,6 +5,7 @@ import SwiftUI
 
 struct ClipDropShortcutSettingsSection: View {
     @ObservedObject var shortcutCoordinator: ClipDropHotkeyCoordinator
+    @StateObject private var launchAtLoginModel = KikiLaunchAtLoginModel()
 
     var body: some View {
         Section("Keyboard Shortcuts") {
@@ -15,12 +16,14 @@ struct ClipDropShortcutSettingsSection: View {
         }
 
         Section("Startup") {
-            // Kiki 0.11.0 stable API. Switch to KikiSettingsLaunchAtLoginRow
-            // after its approval-aware API ships in Kiki 0.12.0.
-            LaunchAtLogin.Toggle("Open at Login")
+            KikiSettingsLaunchAtLoginRow(
+                title: "Open at Login",
+                approvalNote: "Allow Clipboard Drop in System Settings › Login Items to finish enabling it.",
+                openLoginItemsTitle: "Open Login Items",
+                model: launchAtLoginModel
+            )
         }
     }
-
 }
 
 private struct ClipDropShortcutRow: View {

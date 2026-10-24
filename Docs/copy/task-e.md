@@ -9,19 +9,18 @@
 | `ClipDrop/Platform/Hotkey/ClipDropShortcut.swift:88` | macOS could not register this shortcut (OSStatus {status}). | Carbon registration failure with status code. | None specified |
 | `ClipDrop/Platform/Hotkey/ClipDropHotkeyCoordinator.swift:71` | This shortcut conflicts with {action}. | Conflict with the other ClipDrop shortcut. | None specified |
 | `ClipDrop/Platform/Hotkey/ClipDropHotkeyCoordinator.swift:83` | macOS could not register this shortcut. | Unexpected registration failure. | None specified |
-| `ClipDrop/Features/Settings/ClipDropShortcutSettingsSection.swift:10` | Keyboard Shortcuts | Settings section heading. | None specified |
-| `ClipDrop/Features/Settings/ClipDropShortcutSettingsSection.swift:14` | Click a shortcut to record it. Press Escape to cancel. | Shortcut recording help. | None specified |
-| `ClipDrop/Features/Settings/ClipDropShortcutSettingsSection.swift:17` | Startup | Settings section heading. | None specified |
+| `ClipDrop/Features/Settings/ClipDropShortcutSettingsSection.swift:11` | Keyboard Shortcuts | Settings section heading. | None specified |
+| `ClipDrop/Features/Settings/ClipDropShortcutSettingsSection.swift:15` | Click a shortcut to record it. Press Escape to cancel. | Shortcut recording help. | None specified |
+| `ClipDrop/Features/Settings/ClipDropShortcutSettingsSection.swift:18` | Startup | Settings section heading. | None specified |
 | `ClipDrop/Features/Settings/ClipDropShortcutSettingsSection.swift:20` | Open at Login | Login item toggle label. | None specified |
-| `ClipDrop/Features/Settings/ClipDropShortcutSettingsSection.swift:46` | Clear | Clear the selected shortcut. | Short button label |
-| `ClipDrop/Features/Settings/ClipDropShortcutSettingsSection.swift:73,76,86,124` | Record Shortcut | Shortcut capture button and accessibility label. | Short button label |
-| `ClipDrop/Features/Settings/ClipDropShortcutSettingsSection.swift:86` | Press Shortcut | Shortcut capture state. | Short button label |
-| `ClipDrop/App/ClipDropLifecycleCoordinator.swift:117` | Send Clipboard | Status bar context menu action. | None specified |
-| `ClipDrop/App/ClipDropLifecycleCoordinator.swift:118` | Show QR Code for Clipboard | Status bar context menu action. | None specified |
-| `ClipDrop/App/ClipDropLifecycleCoordinator.swift:120` | Settings… | Status bar context menu action. | None specified |
-| `ClipDrop/App/ClipDropLifecycleCoordinator.swift:121` | Quit | Status bar context menu action. | None specified |
+| `ClipDrop/Features/Settings/ClipDropShortcutSettingsSection.swift:49` | Clear | Clear the selected shortcut. | Short button label |
+| `ClipDrop/Features/Settings/ClipDropShortcutSettingsSection.swift:76,79,89,127` | Record Shortcut | Shortcut capture button and accessibility label. | Short button label |
+| `ClipDrop/Features/Settings/ClipDropShortcutSettingsSection.swift:89` | Press Shortcut | Shortcut capture state. | Short button label |
+| `ClipDrop/App/ClipDropLifecycleCoordinator.swift:132` | Send Clipboard | Status bar context menu action. | None specified |
+| `ClipDrop/App/ClipDropLifecycleCoordinator.swift:133` | Show QR Code for Clipboard | Status bar context menu action. | None specified |
+| `ClipDrop/App/ClipDropLifecycleCoordinator.swift:135` | Settings… | Status bar context menu action. | None specified |
+| `ClipDrop/App/ClipDropLifecycleCoordinator.swift:136` | Quit | Status bar context menu action. | None specified |
 | `ClipDrop/Platform/Services/ClipDropServicesProvider.swift:74` | Clipboard Drop could not read text, a link, an image, or a file. | Services error returned for an unsupported pasteboard. | None specified |
-| `ClipDrop/Platform/Services/ClipDropEntryPayload.swift:22` | Image | Temporary plain-text send fallback until image sending lands. | None specified |
 | `Config/AppInfo.plist:41` | Send with Clipboard Drop | macOS Services menu item. | None specified |
 | `Config/AppInfo.plist:46` | Clipboard Drop | Services port name (system registration value). | Internal value |
 | `ClipDrop/App/Intents/ClipDropIntents.swift:13` | Send Text | App Intent display name. | None specified |
@@ -39,3 +38,10 @@
 | `ClipDrop/App/Intents/ClipDropIntents.swift:87-88` | Send clipboard with {App Name} / Send Clipboard | Send Clipboard App Shortcut phrase and short title. | Short title |
 | `ClipDrop/App/Intents/ClipDropIntents.swift:93-94` | Send text with {App Name} / Send Text | Send Text App Shortcut phrase and short title. | Short title |
 | `ClipDrop/App/Intents/ClipDropIntents.swift:99-100` | Show a QR code with {App Name} / Show QR Code | Show QR Code App Shortcut phrase and short title. | Short title |
+
+## Kiki 0.12 follow-up
+
+| Location (`file:line`) | Current English | Purpose / context | Length limit |
+| --- | --- | --- | --- |
+| `ClipDrop/Features/Settings/ClipDropShortcutSettingsSection.swift:21` | Allow Clipboard Drop in System Settings › Login Items to finish enabling it. | Explains that macOS requires approval for the login item. | None specified |
+| `ClipDrop/Features/Settings/ClipDropShortcutSettingsSection.swift:22` | Open Login Items | Opens System Settings to the Login Items approval state. | Short button label |
