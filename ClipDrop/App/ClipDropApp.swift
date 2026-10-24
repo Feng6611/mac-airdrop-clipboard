@@ -39,6 +39,11 @@ final class ClipDropAppDelegate: NSObject, NSApplicationDelegate {
 #if DEBUG
         let arguments = ProcessInfo.processInfo.arguments
         let composition = composition
+        if arguments.contains("--clipdrop-debug-settings-light") {
+            NSApp.appearance = NSAppearance(named: .aqua)
+        } else if arguments.contains("--clipdrop-debug-settings-dark") {
+            NSApp.appearance = NSAppearance(named: .darkAqua)
+        }
         if arguments.contains("--clipdrop-debug-open-settings") {
             DispatchQueue.main.async {
                 composition.router.openSettings()

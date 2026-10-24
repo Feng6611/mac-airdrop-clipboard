@@ -19,6 +19,67 @@ final class ClipDropEntryPointTests: XCTestCase {
         ])
     }
 
+    func testShortcutDisplayTextShowsModifierGlyphsAndKey() {
+        XCTAssertEqual(ClipDropShortcut.defaultSendClipboard.displayText, "⌃⌥⌘C")
+        XCTAssertEqual(
+            ClipDropShortcut(keyCode: UInt32(kVK_ANSI_A), modifiers: UInt32(cmdKey | shiftKey)).displayText,
+            "⇧⌘A"
+        )
+    }
+
+    func testClearedShortcutStaysClearedAfterReload() {
+        let defaults = makeDefaults()
+        let coordinator = ClipDropHotkeyCoordinator(
+            defaults: defaults,
+            registrar: FakeHotkeyRegistrar(),
+            sendClipboard: {},
+            showQRCode: {}
+        )
+
+        coordinator.setShortcut(.defaultSendClipboard, for: .sendClipboard)
+        XCTAssertEqual(coordinator.shortcut(for: .sendClipboard), .defaultSendClipboard)
+        coordinator.setShortcut(nil, for: .sendClipboard)
+        XCTAssertNil(coordinator.shortcut(for: .sendClipboard))
+
+        let reloaded = ClipDropHotkeyCoordinator(
+            defaults: defaults,
+            registrar: FakeHotkeyRegistrar(),
+            sendClipboard: {},
+            showQRCode: {}
+        )
+        XCTAssertNil(reloaded.shortcut(for: .sendClipboard))
+    }
+
+    func testShortcutRejectsUnmodifiedKeyEvents() throws {
+        let plainEvent = try XCTUnwrap(NSEvent.keyEvent(
+            with: .keyDown,
+            location: .zero,
+            modifierFlags: [],
+            timestamp: 0,
+            windowNumber: 0,
+            context: nil,
+            characters: "a",
+            charactersIgnoringModifiers: "a",
+            isARepeat: false,
+            keyCode: UInt16(kVK_ANSI_A)
+        ))
+        let modifiedEvent = try XCTUnwrap(NSEvent.keyEvent(
+            with: .keyDown,
+            location: .zero,
+            modifierFlags: [.command],
+            timestamp: 0,
+            windowNumber: 0,
+            context: nil,
+            characters: "a",
+            charactersIgnoringModifiers: "a",
+            isARepeat: false,
+            keyCode: UInt16(kVK_ANSI_A)
+        ))
+
+        XCTAssertNil(ClipDropShortcut(event: plainEvent))
+        XCTAssertEqual(ClipDropShortcut(event: modifiedEvent)?.displayText, "⌘A")
+    }
+
     func testShortcutConflictAndRegistrationFailureAreExposed() throws {
         let defaults = makeDefaults()
         let registrar = FakeHotkeyRegistrar()
@@ -40,7 +101,7 @@ final class ClipDropEntryPointTests: XCTestCase {
 
         XCTAssertEqual(
             coordinator.failureReason(for: .showQRCode),
-            "This shortcut conflicts with Send Clipboard."
+            "This shortcut conflicts with Send clipboard."
         )
         XCTAssertEqual(registrar.registeredActions, [.sendClipboard])
 

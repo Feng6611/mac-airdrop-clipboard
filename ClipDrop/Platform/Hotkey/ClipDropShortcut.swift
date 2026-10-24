@@ -9,9 +9,9 @@ enum ClipDropHotkeyAction: String, CaseIterable, Codable, Hashable {
     var title: String {
         switch self {
         case .sendClipboard:
-            return "Send Clipboard"
+            return "Send clipboard"
         case .showQRCode:
-            return "Show QR Code for Clipboard"
+            return "Show QR code"
         }
     }
 

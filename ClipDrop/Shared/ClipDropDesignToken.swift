@@ -28,6 +28,21 @@ enum ClipDropDesignToken {
         static let iconButtonHit: CGFloat = 26
     }
 
+    enum Settings {
+        static let shortcutFieldWidth: CGFloat = 140
+        static let shortcutFieldHeight: CGFloat = 22
+        static let segmentedWidth: CGFloat = 220
+        static let shortcutFieldCornerRadius: CGFloat = 6
+        static let shortcutFieldBorderWidth: CGFloat = 0.5
+        static let shortcutRecordingBorderWidth: CGFloat = 1.5
+        static let shortcutClearIconSize: CGFloat = 12
+        static let shortcutClearHitSize: CGFloat = 22
+        static let rowIconWidth: CGFloat = 22
+        static let rowLabelSpacing: CGFloat = 8
+        static let shortcutErrorSpacing: CGFloat = 2
+        static let shortcutTextMinimumScaleFactor: CGFloat = 0.75
+    }
+
     enum Spacing {
         static let page: CGFloat = 12
         static let headerVertical: CGFloat = 8
