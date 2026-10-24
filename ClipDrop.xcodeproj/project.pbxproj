@@ -42,6 +42,14 @@
 		A0010000000000000000002E /* Features/Onboarding/ClipDropOnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000023 /* Features/Onboarding/ClipDropOnboardingFlow.swift */; };
 		A00100000000000000000030 /* Shared/ClipDropPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000024 /* Shared/ClipDropPayload.swift */; };
 		A00100000000000000000031 /* App/ClipDropReviewRequestCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000025 /* App/ClipDropReviewRequestCoordinator.swift */; };
+		A00100000000000000000040 /* Platform/Hotkey/ClipDropShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000026 /* Platform/Hotkey/ClipDropShortcut.swift */; };
+		A00100000000000000000041 /* Platform/Hotkey/ClipDropHotkeyCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000027 /* Platform/Hotkey/ClipDropHotkeyCoordinator.swift */; };
+		A00100000000000000000042 /* Platform/Services/ClipDropServicesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000028 /* Platform/Services/ClipDropServicesProvider.swift */; };
+		A00100000000000000000043 /* Platform/Services/ClipDropDropHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000029 /* Platform/Services/ClipDropDropHandler.swift */; };
+		A00100000000000000000044 /* App/Intents/ClipDropIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0020000000000000000002A /* App/Intents/ClipDropIntents.swift */; };
+		A00100000000000000000045 /* Features/Settings/ClipDropShortcutSettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0020000000000000000002B /* Features/Settings/ClipDropShortcutSettingsSection.swift */; };
+		A00100000000000000000046 /* ClipDropEntryPointTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0020000000000000000002C /* ClipDropEntryPointTests.swift */; };
+		A00100000000000000000047 /* Platform/Services/ClipDropEntryPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0020000000000000000002D /* Platform/Services/ClipDropEntryPayload.swift */; };
 		A00100000000000000000032 /* KikiReview in Frameworks */ = {isa = PBXBuildFile; productRef = A00B0000000000000000000B /* KikiReview */; };
 /* End PBXBuildFile section */
 
@@ -86,6 +94,14 @@
 		A00200000000000000000023 /* Features/Onboarding/ClipDropOnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Onboarding/ClipDropOnboardingFlow.swift; sourceTree = "<group>"; };
 		A00200000000000000000024 /* Shared/ClipDropPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared/ClipDropPayload.swift; sourceTree = "<group>"; };
 		A00200000000000000000025 /* App/ClipDropReviewRequestCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/ClipDropReviewRequestCoordinator.swift; sourceTree = "<group>"; };
+		A00200000000000000000026 /* Platform/Hotkey/ClipDropShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform/Hotkey/ClipDropShortcut.swift; sourceTree = "<group>"; };
+		A00200000000000000000027 /* Platform/Hotkey/ClipDropHotkeyCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform/Hotkey/ClipDropHotkeyCoordinator.swift; sourceTree = "<group>"; };
+		A00200000000000000000028 /* Platform/Services/ClipDropServicesProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform/Services/ClipDropServicesProvider.swift; sourceTree = "<group>"; };
+		A00200000000000000000029 /* Platform/Services/ClipDropDropHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform/Services/ClipDropDropHandler.swift; sourceTree = "<group>"; };
+		A0020000000000000000002A /* App/Intents/ClipDropIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/Intents/ClipDropIntents.swift; sourceTree = "<group>"; };
+		A0020000000000000000002B /* Features/Settings/ClipDropShortcutSettingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Settings/ClipDropShortcutSettingsSection.swift; sourceTree = "<group>"; };
+		A0020000000000000000002C /* ClipDropEntryPointTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipDropEntryPointTests.swift; sourceTree = "<group>"; };
+		A0020000000000000000002D /* Platform/Services/ClipDropEntryPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform/Services/ClipDropEntryPayload.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,6 +162,7 @@
 			isa = PBXGroup;
 			children = (
 				A00200000000000000000007 /* ClipDropTests.swift */,
+				A0020000000000000000002C /* ClipDropEntryPointTests.swift */,
 			);
 			path = ClipDropTests;
 			sourceTree = "<group>";
@@ -162,6 +179,7 @@
 		A00700000000000000000005 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				A00700000000000000000015 /* Intents */,
 				A00200000000000000000001 /* App/ClipDropApp.swift */,
 				A0020000000000000000000D /* App/ClipDropController.swift */,
 				A0020000000000000000001A /* App/ClipDropAppDefinition.swift */,
@@ -198,6 +216,7 @@
 		A00700000000000000000009 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				A0020000000000000000002B /* Features/Settings/ClipDropShortcutSettingsSection.swift */,
 				A00200000000000000000005 /* Features/Settings/ClipDropSettingsView.swift */,
 				A00200000000000000000011 /* Features/Settings/ClipDropSettingsTab.swift */,
 			);
@@ -209,6 +228,8 @@
 			children = (
 				A0070000000000000000000C /* Clipboard */,
 				A0070000000000000000000D /* Sharing */,
+				A00700000000000000000013 /* Hotkey */,
+				A00700000000000000000014 /* Services */,
 			);
 			name = Platform;
 			sourceTree = "<group>";
@@ -228,6 +249,33 @@
 				A0020000000000000000000C /* Platform/Sharing/ClipboardSenderService.swift */,
 			);
 			name = Sharing;
+			sourceTree = "<group>";
+		};
+		A00700000000000000000013 /* Hotkey */ = {
+			isa = PBXGroup;
+			children = (
+				A00200000000000000000026 /* Platform/Hotkey/ClipDropShortcut.swift */,
+				A00200000000000000000027 /* Platform/Hotkey/ClipDropHotkeyCoordinator.swift */,
+			);
+			name = Hotkey;
+			sourceTree = "<group>";
+		};
+		A00700000000000000000014 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				A0020000000000000000002D /* Platform/Services/ClipDropEntryPayload.swift */,
+				A00200000000000000000028 /* Platform/Services/ClipDropServicesProvider.swift */,
+				A00200000000000000000029 /* Platform/Services/ClipDropDropHandler.swift */,
+			);
+			name = Services;
+			sourceTree = "<group>";
+		};
+		A00700000000000000000015 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				A0020000000000000000002A /* App/Intents/ClipDropIntents.swift */,
+			);
+			name = Intents;
 			sourceTree = "<group>";
 		};
 		A0070000000000000000000E /* Shared */ = {
@@ -405,6 +453,13 @@
 				A0010000000000000000002E /* Features/Onboarding/ClipDropOnboardingFlow.swift in Sources */,
 				A00100000000000000000030 /* Shared/ClipDropPayload.swift in Sources */,
 				A00100000000000000000031 /* App/ClipDropReviewRequestCoordinator.swift in Sources */,
+				A00100000000000000000040 /* Platform/Hotkey/ClipDropShortcut.swift in Sources */,
+				A00100000000000000000041 /* Platform/Hotkey/ClipDropHotkeyCoordinator.swift in Sources */,
+				A00100000000000000000042 /* Platform/Services/ClipDropServicesProvider.swift in Sources */,
+				A00100000000000000000043 /* Platform/Services/ClipDropDropHandler.swift in Sources */,
+				A00100000000000000000044 /* App/Intents/ClipDropIntents.swift in Sources */,
+				A00100000000000000000045 /* Features/Settings/ClipDropShortcutSettingsSection.swift in Sources */,
+				A00100000000000000000047 /* Platform/Services/ClipDropEntryPayload.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -413,6 +468,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A00100000000000000000007 /* ClipDropTests.swift in Sources */,
+				A00100000000000000000046 /* ClipDropEntryPointTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

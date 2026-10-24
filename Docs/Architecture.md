@@ -48,13 +48,31 @@ app lifecycle, or talk directly to pasteboard/AirDrop services.
 This layer may import AppKit. Its protocols and result types stay close to the
 service so tests can inject a deterministic provider.
 
+`Platform/Hotkey/` owns Carbon global-hotkey registration and shortcut
+serialization. `Platform/Services/` owns Services pasteboard reading, a
+task-local `ClipDropEntryPayload` for text, URLs, rich text, images, and file
+URLs, and the single drop-pasteboard handler seam. Its temporary Router bridge
+falls back to text for rich content and files until the content pipeline adds
+these cases to `ClipDropPayload` and the sharing implementation. AppKit
+Services are listed in `Config/AppInfo.plist`; after changing them, run
+`pbs -update` or log out and
+back in before expecting the Services menu to refresh. Kiki 0.11.0 does not
+provide popover drop callbacks, so `ClipDropDropHandler.handle(_:)` is ready for
+the Kiki 0.12 integration point.
+
+App Intents and their Shortcuts actions are app-owned. The Shortcuts actions are
+Send Text (required Text, optional Edit before sending; summary: “Send {Text}”),
+Send Clipboard (no parameters; summary: “Send the current clipboard”), and Show
+QR Code (required Text; summary: “Show a QR code for {Text}”). Suggested phrases
+include the app name through `\(.applicationName)`.
+
 ### Shared
 
 `Shared/` owns app-local values:
 
 - App name, bundle identifier, About URLs, limits, and design tokens.
 - `ClipDropPayload` (`.text`, `.url`) and `ClipDropSendSource` for every send
-  route. Future payload cases extend this contract.
+  route.
 - Send-format preferences and app-prefixed UserDefaults keys.
 
 ## Send lifecycle
@@ -97,6 +115,10 @@ Settings uses `KikiSettingsCoordinator`, `KikiStandardAboutPane`, and Kiki row
 components from the pinned Base package. The About pane has no access-status
 row. The app adds its repository, author profile, App Store rating, Command
 Reopen, Privacy, and Support links through `additionalLinks`.
+
+The Open at Login control uses Kiki 0.11.0's stable `LaunchAtLogin.Toggle`.
+After Kiki 0.12.0 ships, replace it with the approval-aware
+`KikiSettingsLaunchAtLoginRow` so a pending Login Items approval is explained.
 
 Keep the Settings scene in the app target and do not add duplicate windows or
 test-only panes. The About links use Kiki's link-row component; Kiki itself is

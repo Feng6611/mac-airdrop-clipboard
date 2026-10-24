@@ -5,6 +5,7 @@ import SwiftUI
 struct ClipDropSettingsView: View {
     let config: ClipDropAppConfig
     let settingsCoordinator: KikiSettingsCoordinator<ClipDropSettingsTab>
+    let shortcutCoordinator: ClipDropHotkeyCoordinator
     @AppStorage(ClipDropPreferenceKeys.textFileFormat) private var textFileFormat = ClipDropSendPreferences.defaultTextFileFormat.rawValue
     @AppStorage(ClipDropPreferenceKeys.urlSendFormat) private var urlSendFormat = ClipDropSendPreferences.defaultURLSendFormat.rawValue
 
@@ -21,9 +22,7 @@ struct ClipDropSettingsView: View {
 
     private var generalPane: some View {
         KikiSettingsPane {
-            Section("Startup") {
-                LaunchAtLogin.Toggle("Launch at Login")
-            }
+            ClipDropShortcutSettingsSection(shortcutCoordinator: shortcutCoordinator)
 
             Section("File Formats") {
                 KikiSettingsHelperText(
